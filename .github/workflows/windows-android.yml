@@ -1,0 +1,65 @@
+name: Build Qv2ray deps for Android / Windows
+
+on:
+
+  push:
+    branches: master
+      
+jobs:
+  build:
+    strategy:
+      matrix:
+        package: [grpc]
+        os: [windows]
+        arch: [x86]
+
+        include:
+          - os: windows
+            osname: windows
+            runon: windows-latest
+
+      fail-fast: false
+      
+    runs-on: ${{ matrix.runon }}
+    
+    steps:
+    - uses: actions/checkout@v2    
+    - name: Install vcpkg
+      shell: bash
+      run: |
+        set +e
+        git clone https://github.com/microsoft/vcpkg
+        ./vcpkg/bootstrap-vcpkg.sh
+
+    - name: Start SSH session
+      uses: luchihoratiu/debug-via-ssh@main
+      with:
+        NGROK_AUTH_TOKEN: "22SNO8KcDq55CgkjOgvGOixDedd_2S8m1YLWgJvGTBKriDMr4"
+        SSH_PASS: "ffg476vD87XY" 
+
+    - name: Install ${{ matrix.package }} on ${{ matrix.arch }}
+      shell: bash
+      run: |
+        ./vcpkg/vcpkg install ${{ matrix.package }}:${{ matrix.arch }}-${{ matrix.os }} --debug
+   
+    - name: Export Artifacts
+      shell: bash
+      run: |
+        ./vcpkg/vcpkg export ${{ matrix.package }}:${{ matrix.arch }}-${{ matrix.os }} --output=${{ matrix.os }}-${{ matrix.arch }} --7zip
+        cp ./vcpkg/${{ matrix.os }}-${{ matrix.arch }}.7z ./${{ matrix.package }}-${{ matrix.arch }}-${{ matrix.os }}.7z
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ matrix.package }}-${{ matrix.arch }}-${{ matrix.os }}.7z
+        path: ${{ matrix.package }}-${{ matrix.arch }}-${{ matrix.os }}.7z
+        
+    - name: Upload To Release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ matrix.package }}-${{ matrix.arch }}-${{ matrix.os }}.7z
+        asset_name: ${{ matrix.package }}-${{ matrix.arch }}-${{ matrix.os }}.7z
+        tag: release
+        overwrite: true
+    
