@@ -20,7 +20,7 @@ jobs:
 
       fail-fast: false
       
-    runs-on: ${{ matrix.runon }}
+    runs-on: ${{ matrix.os }}
     
     steps:
     - uses: actions/checkout@v2    
