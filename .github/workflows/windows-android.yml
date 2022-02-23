@@ -7,14 +7,8 @@ on:
       
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [macos]
 
-
-      fail-fast: false
-      
-    runs-on: ${{ matrix.os }}
+    runs-on: macos
     
     steps:
     - uses: actions/checkout@v2    
