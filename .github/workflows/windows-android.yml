@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         package: [grpc]
-        os: [windows, ubuntu, macos]
+        os: [macos]
         arch: [x86]
 
         include:
