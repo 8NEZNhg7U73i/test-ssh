@@ -26,12 +26,18 @@ jobs:
         wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile ES-1.1.0.23.zip
         wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
         wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile c:\users\runneradmin\ES-1.1.0.23.zip
+
     - name: Unzip everything
       shell: cmd
       run: |
         unzip Everything-1.4.1.1015.x64.en-US.zip
         unzip ES-1.1.0.23.zip
-        echo ${GITHUB_WORKSPACE}
+        
+    - name: create vdisk
+      shell: cmd
+      run: |
+        echo
+        
     - name: Start SSH session
       uses: luchihoratiu/debug-via-ssh@main
       with:
