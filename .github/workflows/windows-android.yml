@@ -31,8 +31,6 @@ jobs:
       run: |
         unzip Everything-1.4.1.1015.x64.en-US.zip
         unzip ES-1.1.0.23.zip
-        unzip c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
-        unzip c:\users\runneradmin\ES-1.1.0.23.zip
         start "" /b everything.exe
         start "" /b es.exe -export-efu es.efu
 
