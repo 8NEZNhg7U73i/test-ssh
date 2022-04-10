@@ -31,10 +31,7 @@ jobs:
       run: |
         unzip Everything-1.4.1.1015.x64.en-US.zip
         unzip ES-1.1.0.23.zip
-        everything.exe
-        es.exe -export-efu es.efu
-        7z a es.7z es.efu
-
+        echo ${GITHUB_WORKSPACE}
     - name: Start SSH session
       uses: luchihoratiu/debug-via-ssh@main
       with:
