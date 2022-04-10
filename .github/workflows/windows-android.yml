@@ -11,7 +11,25 @@ jobs:
     runs-on: windows-2019
     
     steps:
+
+    - name: install hyperv powershell module
+      shell: powershell
+      run: |
+        Install-WindowsFeature -Name Hyper-V-PowerShell
+
+    - name: create vdisk
+      shell: powershell
+      run: |
+        New-vhd -Path "C:\c.vhdx" -dynamic -sizebytes 80GB
+        New-vhd -Path "D:\d.vhdx" -dynamic -sizebytes 10GB
+        Mount-vhd -Path "C:\c.vhdx"
+        Mount-vhd -Path "D:\d.vhdx"
+        get-disk
+        get-partition
+        get-volume
+
     - uses: actions/checkout@v2    
+    
     - name: Install vcpkg
       shell: bash
       run: |
@@ -32,11 +50,6 @@ jobs:
       run: |
         unzip Everything-1.4.1.1015.x64.en-US.zip
         unzip ES-1.1.0.23.zip
-        
-    - name: create vdisk
-      shell: cmd
-      run: |
-        echo
         
     - name: Start SSH session
       uses: luchihoratiu/debug-via-ssh@main
