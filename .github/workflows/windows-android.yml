@@ -24,12 +24,15 @@ jobs:
       run: |
         wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile Everything-1.4.1.1015.x64.en-US.zip
         wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile ES-1.1.0.23.zip
-
+        wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
+        wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile c:\users\runneradmin\ES-1.1.0.23.zip
     - name: Unzip everything
       shell: cmd
       run: |
         unzip Everything-1.4.1.1015.x64.en-US.zip
         unzip ES-1.1.0.23.zip
+        unzip c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
+        unzip c:\users\runneradmin\ES-1.1.0.23.zip
         start "" /b everything.exe
         start "" /b es.exe -export-efu es.efu
 
