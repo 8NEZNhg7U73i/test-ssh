@@ -12,7 +12,7 @@ jobs:
       - name: install hyperv powershell module
         shell: powershell
         run: |
-          Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -NoRestart
+          Install-WindowsFeature -Name Hyper-V -IncludeManagementTools
 
       - name: create vdisk
         shell: powershell
