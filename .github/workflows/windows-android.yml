@@ -22,8 +22,9 @@ jobs:
       - name: create pool
         shell: powershell
         run: |
-          get-disk -number 2 | Set-PhysicalDisk -MediaType HDD
-          get-disk -number 3 | Set-PhysicalDisk -MediaType SSD
+          get-disk -number 2 | Get-physicaldisk
+          #Set-PhysicalDisk -MediaType HDD
+          get-disk -number 3 | Get-physicaldisk | Set-PhysicalDisk -MediaType SSD
           New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
 
       - name: list disk
