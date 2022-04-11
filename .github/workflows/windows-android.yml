@@ -14,9 +14,9 @@ jobs:
         shell: cmd
         run: |
           echo create vdisk file=c:\c.vhdx maximum=85000 type=EXPANDABLE >> disk
-          echo attach vdisk
+          echo attach vdisk >> disk
           echo create vdisk file=d:\d.vhdx maximum=10000 type=EXPANDABLE >> disk
-          echo attach vdisk
+          echo attach vdisk >> disk
           diskpart /s disk
 
       - name: list disk
