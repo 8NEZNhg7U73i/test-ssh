@@ -23,9 +23,8 @@ jobs:
         shell: powershell
         run: |
           New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
-          Set-PhysicalDisk -FriendlyName PhysicalDisk2 -MediaType HDD
-          Set-PhysicalDisk -FriendlyName PhysicalDisk3 -MediaType SSD
-
+          Get-VirtualDisk
+          
       - name: list disk
         shell: powershell
         run: get-disk
