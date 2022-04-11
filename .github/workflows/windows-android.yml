@@ -22,12 +22,17 @@ jobs:
       - name: create pool
         shell: powershell
         run: |
+          $storage = Get-StorageSubSystem
           $hdd = get-disk -number 2 | Get-physicaldisk
-          Set-PhysicalDisk -InputObject $hdd
           $ssd = get-disk -number 3 | Get-physicaldisk
-          Set-PhysicalDisk -InputObject $hdd
-          New-StoragePool -FriendlyName HDD -StorageSubsystemFriendlyName (Get-StorageSubSystem) -PhysicalDisks $hdd
-          New-StoragePool -FriendlyName SSD -StorageSubsystemFriendlyName (Get-StorageSubSystem) -PhysicalDisks $ssd
+          $SSDTier = Get-StorageTier -FriendlyName SSDTier
+          $HDDTier = Get-StorageTier -FriendlyName HDDTier
+          Set-PhysicalDisk -InputObject $hdd -MediaType HDD
+          Set-PhysicalDisk -InputObject $ssd -MediaType SSD
+          New-StoragePool -StorageSubSystemId $storage.UniqueId -FriendlyName disk -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
+          Get-StoragePool disk | New-StorageTier -FriendlyName hdd -MediaType HDD
+          Get-StoragePool disk | New-StorageTier -FriendlyName ssd -MediaType SSD
+          Get-StoragePool disk | New-VirtualDisk -FriendlyName TieredDisk -ProvisioningType Fixed –StorageTiers $SSDTier,$HDDTier -StorageTierSizes 85GB, 10GB
 
       - name: list disk
         shell: powershell
