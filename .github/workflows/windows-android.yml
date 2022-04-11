@@ -19,16 +19,26 @@ jobs:
           echo attach vdisk >> disk
           diskpart /s disk
 
-      - name: list disk
+      - name: create pool
         shell: powershell
         run: |
-          Get-StorageSubSystem
-          $PhysicalDisks = (Get-PhysicalDisk -CanPool $True)
-          New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks $PhysicalDisks
-          get-disk
-          get-physicalDisk
-          get-partition
-          get-volume
+          New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
+
+      - name: list disk
+        shell: powershell
+        run: get-disk
+
+      - name: list physicalDisk
+        shell: powershell
+        run: get-physicalDisk
+
+      - name: list partition
+        shell: powershell
+        run: get-partition
+
+      - name: list volume
+        shell: powershell
+        run: get-volume
 
       - uses: actions/checkout@v2
 
