@@ -1,59 +1,56 @@
 name: test
 
 on:
-
   push:
     branches: master
-      
+
 jobs:
   build:
-
     runs-on: windows-2019
-    
+
     steps:
+      - name: install hyperv powershell module
+        shell: powershell
+        run: |
+          Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -NoRestart
 
-    - name: install hyperv powershell module
-      shell: powershell
-      run: |
-        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -NoRestart
+      - name: create vdisk
+        shell: powershell
+        run: |
+          New-vhd -Path "C:\c.vhdx" -dynamic -sizebytes 80GB
+          New-vhd -Path "D:\d.vhdx" -dynamic -sizebytes 10GB
+          Mount-vhd -Path "C:\c.vhdx"
+          Mount-vhd -Path "D:\d.vhdx"
+          get-disk
+          get-partition
+          get-volume
 
-    - name: create vdisk
-      shell: powershell
-      run: |
-        New-vhd -Path "C:\c.vhdx" -dynamic -sizebytes 80GB
-        New-vhd -Path "D:\d.vhdx" -dynamic -sizebytes 10GB
-        Mount-vhd -Path "C:\c.vhdx"
-        Mount-vhd -Path "D:\d.vhdx"
-        get-disk
-        get-partition
-        get-volume
+      - uses: actions/checkout@v2
 
-    - uses: actions/checkout@v2    
+      - name: Install vcpkg
+        shell: bash
+        run: |
+          set +e
+          git clone https://github.com/microsoft/vcpkg
+          ./vcpkg/bootstrap-vcpkg.sh
 
-    - name: Install vcpkg
-      shell: bash
-      run: |
-        set +e
-        git clone https://github.com/microsoft/vcpkg
-        ./vcpkg/bootstrap-vcpkg.sh
-    
-    - name: Download everything
-      shell: powershell
-      run: |
-        wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile Everything-1.4.1.1015.x64.en-US.zip
-        wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile ES-1.1.0.23.zip
-        wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
-        wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile c:\users\runneradmin\ES-1.1.0.23.zip
+      - name: Download everything
+        shell: powershell
+        run: |
+          wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile Everything-1.4.1.1015.x64.en-US.zip
+          wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile ES-1.1.0.23.zip
+          wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
+          wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile c:\users\runneradmin\ES-1.1.0.23.zip
 
-    - name: Unzip everything
-      shell: cmd
-      run: |
-        unzip Everything-1.4.1.1015.x64.en-US.zip
-        unzip ES-1.1.0.23.zip
-        
-    - name: Start SSH session
-      uses: luchihoratiu/debug-via-ssh@main
-      if: ${{ failure() }}
-      with:
-        NGROK_AUTH_TOKEN: "22SNO8KcDq55CgkjOgvGOixDedd_2S8m1YLWgJvGTBKriDMr4"
-        SSH_PASS: "ffg476vD87XY" 
+      - name: Unzip everything
+        shell: cmd
+        run: |
+          unzip Everything-1.4.1.1015.x64.en-US.zip
+          unzip ES-1.1.0.23.zip
+
+      - name: Start SSH session
+        uses: luchihoratiu/debug-via-ssh@main
+        if: ${{ failure() }}
+        with:
+          NGROK_AUTH_TOKEN: "22SNO8KcDq55CgkjOgvGOixDedd_2S8m1YLWgJvGTBKriDMr4"
+          SSH_PASS: "ffg476vD87XY"
