@@ -17,6 +17,7 @@ jobs:
       - name: create vdisk
         shell: powershell
         run: |
+          Import-module Hyper-v
           New-vhd -Path "C:\c.vhdx" -dynamic -sizebytes 80GB
           New-vhd -Path "D:\d.vhdx" -dynamic -sizebytes 10GB
           Mount-vhd -Path "C:\c.vhdx"
