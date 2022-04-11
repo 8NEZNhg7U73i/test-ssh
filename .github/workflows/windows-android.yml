@@ -50,7 +50,7 @@ jobs:
         shell: cmd
         run: |
           echo list disk > disk
-          echo select vdisk file=c:\c.vhd
+          echo select vdisk file=c:\c.vhd >> disk
           echo attach vdisk >> disk
           diskpart /s disk
 
