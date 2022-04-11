@@ -22,6 +22,8 @@ jobs:
       - name: list disk
         shell: powershell
         run: |
+          Initialize-Disk -PartitionStyle MBR -VirtualDisk c:\c.vhd | fl
+          Initialize-Disk -PartitionStyle MBR -VirtualDisk d:\d.vhd | fl
           get-disk | fl
           get-physicalDisk | fl
           get-partition | fl
