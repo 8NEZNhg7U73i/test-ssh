@@ -22,7 +22,9 @@ jobs:
 
       - name: install vhdx module
         shell: powershell
-        run: install-module vhdx -force
+        run: |
+          install-module vhdx -force
+          Install-Module -Name WindowsImageTools -force
 
       - name: ceeate vdisk
         shell: powershell
@@ -37,7 +39,7 @@ jobs:
           if ($SSDSize -eq $null){
             $SSDSize = [int64]((get-volume -driveletter d).sizeremaining * $SSDUsableSpace)
           }
-          new-vhdx -path c:\c.vhdx -type fixed -size $HDDSize
+          #new-vhdx -path c:\c.vhdx -type fixed -size $HDDSize
           mount-diskimage c:\c.vhdx
           new-vhdx -path d:\d.vhdx -type fixed -size $SSDSize
           mount-diskimage d:\d.vhdx
