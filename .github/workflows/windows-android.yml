@@ -27,9 +27,6 @@ jobs:
           get-physicalDisk
           get-partition
           get-volume
-          $PDToAdd = Get-PhysicalDisk -CanPool $True
-          Get-PhysicalDisk -CanPool $True
-          Add-PhysicalDisk -StoragePoolFriendlyName "Demo Pool" -PhysicalDisks $PDToAdd
 
       - uses: actions/checkout@v2
 
