@@ -23,8 +23,8 @@ jobs:
         shell: powershell
         run: |
           #Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
-          get-disk
-          get-physicalDisk
+          #get-disk
+          #get-physicalDisk
           Get-PhysicalDisk -CanPool $True
 
       - uses: actions/checkout@v2
