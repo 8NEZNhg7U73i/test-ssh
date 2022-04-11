@@ -24,7 +24,7 @@ jobs:
         run: |
           New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
           Get-VirtualDisk
-          
+
       - name: list disk
         shell: powershell
         run: get-disk
@@ -67,7 +67,7 @@ jobs:
       - name: Start SSH session
         uses: luchihoratiu/debug-via-ssh@main
         #if: ${{ failure() }}
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         with:
           NGROK_AUTH_TOKEN: "22SNO8KcDq55CgkjOgvGOixDedd_2S8m1YLWgJvGTBKriDMr4"
           SSH_PASS: "ffg476vD87XY"
