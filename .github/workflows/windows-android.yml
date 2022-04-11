@@ -23,7 +23,7 @@ jobs:
         shell: powershell
         run: |
           $PDToAdd = Get-PhysicalDisk -CanPool $True
-          New-StoragePool –FriendlyName Storage –StorageSubsystemFriendlyName "Windows Storage*" –PhysicalDisks $PDToAdd
+          New-StoragePool –FriendlyName Storage –StorageSubsystemFriendlyName "Windows Storage" –PhysicalDisks $PDToAdd
           get-disk
           get-physicalDisk
           get-partition
