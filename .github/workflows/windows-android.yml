@@ -22,13 +22,9 @@ jobs:
       - name: create pool
         shell: powershell
         run: |
-          $hdd=get-disk -number 2 | select uniqueid
-          $ssd=get-disk -number 3 | select uniqueid
-          echo $hdd
-          echo $ssd
+          get-disk -number 2 | Set-PhysicalDisk -MediaType HDD
+          get-disk -number 3 | Set-PhysicalDisk -MediaType SSD
           New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
-          Set-PhysicalDisk -UniqueId $hdd -MediaType HDD
-          Set-PhysicalDisk -UniqueId $ssd -MediaType SSD
 
       - name: list disk
         shell: powershell
@@ -47,13 +43,6 @@ jobs:
         run: get-volume
 
       - uses: actions/checkout@v2
-
-      - name: Install vcpkg
-        shell: bash
-        run: |
-          set +e
-          git clone https://github.com/microsoft/vcpkg
-          ./vcpkg/bootstrap-vcpkg.sh
 
       - name: Download everything
         shell: powershell
