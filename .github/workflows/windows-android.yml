@@ -24,7 +24,7 @@ jobs:
         run: |
           Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
           $PDToAdd = Get-PhysicalDisk -CanPool $True
-          Add-PhysicalDisk -StoragePoolFriendlyName "Demo Pool" -PhysicalDisks
+          Add-PhysicalDisk -StoragePoolFriendlyName "Demo Pool" -PhysicalDisks $PDToAdd
           get-disk | fl
           get-physicalDisk | fl
           get-partition | fl
