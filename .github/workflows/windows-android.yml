@@ -24,21 +24,6 @@ jobs:
         shell: powershell
         run: install-module vhdx -force
 
-      - name: create pool
-        shell: powershell
-        run: |
-          $storage = Get-StorageSubSystem
-          $hdd = get-disk -number 2 | Get-physicaldisk
-          $ssd = get-disk -number 3 | Get-physicaldisk
-          Set-PhysicalDisk -InputObject $hdd -MediaType HDD
-          Set-PhysicalDisk -InputObject $ssd -MediaType SSD
-          New-StoragePool -StorageSubSystemId $storage.UniqueId -FriendlyName disk -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
-          Get-StoragePool disk | New-StorageTier -FriendlyName hddtier -MediaType HDD 
-          Get-StoragePool disk | New-StorageTier -FriendlyName ssdtier -MediaType SSD
-          $HDDTier = Get-StorageTier -FriendlyName hddtier
-          $SSDTier = Get-StorageTier -FriendlyName ssdtier
-          Get-StoragePool disk | New-VirtualDisk -FriendlyName TieredDisk -Size 0.02TB -ProvisioningType Fixed –StorageTiers $SSDTier,$HDDTier
-
       - name: ceeate vdisk
         shell: powershell
         run: |
