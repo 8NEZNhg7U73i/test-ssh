@@ -15,7 +15,7 @@ jobs:
     - name: install hyperv powershell module
       shell: powershell
       run: |
-        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
+        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -NoRestart
 
     - name: create vdisk
       shell: powershell
