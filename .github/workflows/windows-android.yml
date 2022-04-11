@@ -9,22 +9,20 @@ jobs:
     runs-on: windows-2019
 
     steps:
-      - name: install hyperv powershell module
-        shell: powershell
-        run: |
-          Install-WindowsFeature -Name Hyper-V-PowerShell
 
       - name: create vdisk
+        shell: cmd
+        run: |
+          echo create vdisk file=c:\c.vhdx maximum=85000 type=FIXED >> disk
+          echo create vdisk file=d:\d.vhdx maximum=10000 type=FIXED >> disk
+          diskpart /s disk
+
+      - name: list disk
         shell: powershell
         run: |
-          Import-module Hyper-v
-          New-vhd -Path "C:\c.vhdx" -dynamic -sizebytes 80GB
-          New-vhd -Path "D:\d.vhdx" -dynamic -sizebytes 10GB
-          Mount-vhd -Path "C:\c.vhdx"
-          Mount-vhd -Path "D:\d.vhdx"
-          get-disk
-          get-partition
-          get-volume
+          get-disk | fl
+          get-partition | fl
+          get-volume | fl
 
       - uses: actions/checkout@v2
 
