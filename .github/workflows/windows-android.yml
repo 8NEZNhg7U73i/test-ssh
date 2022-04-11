@@ -25,7 +25,9 @@ jobs:
           #Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
           #get-disk
           #get-physicalDisk
+          $PDToAdd = Get-PhysicalDisk -CanPool $True
           Get-PhysicalDisk -CanPool $True
+          Add-PhysicalDisk -StoragePoolFriendlyName "Pool" -PhysicalDisks $PDToAdd
 
       - uses: actions/checkout@v2
 
