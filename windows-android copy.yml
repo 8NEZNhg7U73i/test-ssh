@@ -10,14 +10,46 @@ jobs:
 
     steps:
 
-      - name: create vdisk
+      - name: create hdd vdisk
         shell: cmd
         run: |
+          echo list disk > disk
           echo create vdisk file=c:\c.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
+          diskpart /s disk
+
+      - name: set hdd vdisk
+        shell: powershell   
+        run: |
+          Set-PhysicalDisk -FriendlyName "Msft Virtual Disk" -MediaType HDD   
+
+      - name: detach hdd vdisk
+        shell: cmd
+        run: |
+          echo list disk > disk
+          echo select vdisk file=c:\c.vhd >> disk
+          echo detach vdisk >> disk
+          diskpart /s disk
+
+      - name: create ssd vdisk
+        shell: cmd
+        run: |
+          echo list disk > disk
           echo create vdisk file=d:\d.vhd maximum=10240 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
-          echo list disk >> disk
+          diskpart /s disk
+
+      - name: set ssd vdisk
+        shell: powershell   
+        run: |
+          Set-PhysicalDisk -FriendlyName "Msft Virtual Disk" -MediaType SSD   
+
+      - name: detach hdd vdisk
+        shell: cmd
+        run: |
+          echo list disk > disk
+          echo select vdisk file=d:\d.vhd
+          echo detach vdisk >> disk
           diskpart /s disk
 
       - name: create pool
