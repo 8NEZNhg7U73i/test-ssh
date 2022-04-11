@@ -9,7 +9,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-
       - name: create vdisk
         shell: cmd
         run: |
@@ -20,6 +19,10 @@ jobs:
           echo attach vdisk >> disk
           echo convert mbr >> disk
           diskpart /s disk
+
+      - name: install vhdx module
+        shell: powershell
+        run: install-module vhdx -force
 
       - name: create pool
         shell: powershell
@@ -34,7 +37,55 @@ jobs:
           Get-StoragePool disk | New-StorageTier -FriendlyName ssdtier -MediaType SSD
           $HDDTier = Get-StorageTier -FriendlyName hddtier
           $SSDTier = Get-StorageTier -FriendlyName ssdtier
-          Get-StoragePool disk | New-VirtualDisk -FriendlyName TieredDisk -Size 0.02TB -ProvisioningType Fixed –StorageTiers $SSDTier,$HDDTier 
+          Get-StoragePool disk | New-VirtualDisk -FriendlyName TieredDisk -Size 0.02TB -ProvisioningType Fixed –StorageTiers $SSDTier,$HDDTier
+
+      - name: ceeate vdisk
+        shell: powershell
+        run: |
+          $HDDSize = $null
+          $SSDSize = $null
+          $HDDUsableSpace = 0.95
+          $SSDUsableSpace = 0.95
+          if ($HDDSize -eq $null){
+            $HDDSize = [int64]((get-volume -driveletter c).sizeremaining * $HDDUsableSpace)
+          }
+          if ($SSDSize -eq $null){
+            $SSDSize = [int64]((get-volume -driveletter d).sizeremaining * $SSDUsableSpace)
+          }
+          new-vhdx -path c:\c.vhdx -type fixed -size $HDDSize
+          mount-diskimage c:\c.vhdx
+          new-vhdx -path d:\d.vhdx -type fixed -size $SSDSize
+          mount-diskimage d:\d.vhdx
+
+      - name: create pool
+        shell: powershell
+        run: |
+          $hdd = get-disk -number 2 | Get-physicaldisk
+          $ssd = get-disk -number 3 | Get-physicaldisk
+          Set-PhysicalDisk -InputObject $hdd -MediaType HDD
+          Set-PhysicalDisk -InputObject $ssd -MediaType SSD
+          $SSDTierSize = $null
+          $HDDTierSize = $null
+          $TierUsableSpace = 1
+          New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
+          Get-StoragePool -FriendlyName vg | Get-PhysicalDisk | Select FriendlyName, MediaType
+          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName $SSDTierName -MediaType SSD
+          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName $HDDTierName -MediaType HDD
+          if ($SSDTierSize -eq $null){
+          $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
+          $SSDTierSize = [int64]($SSDTierSize * $TierUsableSpace)
+          }
+          if ($HDDTierSize -eq $null){
+          $HDDTierSize = (Get-StorageTierSupportedSize -FriendlyName HDDTier -ResiliencySettingName Simple).TierSizeMax
+          $HDDTierSize = [int64]($HDDTierSize * $TierUsableSpace)
+          }
+          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
+          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple -AutoWriteCacheSize -AutoNumberOfColumns
+          Write-Output "preparing volume"
+          Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
+          Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
+          Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
+          Get-Volume -DriveLetter Z
 
       - name: list disk
         shell: powershell
@@ -43,7 +94,7 @@ jobs:
       - name: list physicalDisk
         shell: powershell
         run: get-physicalDisk
-        
+
       - name: list partition
         shell: powershell
         run: get-partition
