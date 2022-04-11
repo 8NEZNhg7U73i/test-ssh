@@ -23,6 +23,8 @@ jobs:
         shell: powershell
         run: |
           Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
+          $PDToAdd = Get-PhysicalDisk -CanPool $True
+          Add-PhysicalDisk -StoragePoolFriendlyName "Demo Pool" -PhysicalDisks
           get-disk | fl
           get-physicalDisk | fl
           get-partition | fl
