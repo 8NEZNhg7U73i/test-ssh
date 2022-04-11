@@ -25,9 +25,8 @@ jobs:
           Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
           get-disk
           get-physicalDisk
-          get-partition
-          get-volume
-
+          Get-PhysicalDisk -CanPool $True
+          
       - uses: actions/checkout@v2
 
       - name: Install vcpkg
