@@ -13,9 +13,9 @@ jobs:
       - name: create vdisk
         shell: cmd
         run: |
-          echo create vdisk file=c:\c.vhd maximum=85000 type=EXPANDABLE >> disk
+          echo create vdisk file=c:\c.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
-          echo create vdisk file=d:\d.vhd maximum=10000 type=EXPANDABLE >> disk
+          echo create vdisk file=d:\d.vhd maximum=10240 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
           diskpart /s disk
 
@@ -23,6 +23,7 @@ jobs:
         shell: powershell
         run: |
           get-disk | fl
+          get-physicalDisk | fl
           get-partition | fl
           get-volume | fl
 
