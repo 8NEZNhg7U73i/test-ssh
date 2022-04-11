@@ -22,11 +22,11 @@ jobs:
       - name: list disk
         shell: powershell
         run: |
-          Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
+          #Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
           get-disk
           get-physicalDisk
           Get-PhysicalDisk -CanPool $True
-          
+
       - uses: actions/checkout@v2
 
       - name: Install vcpkg
