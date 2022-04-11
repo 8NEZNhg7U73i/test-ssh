@@ -22,7 +22,7 @@ jobs:
       - name: list disk
         shell: powershell
         run: |
-          #Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
+          Initialize-Disk -FriendlyName "Msft Virtual Disk" -PartitionStyle MBR
           #get-disk
           #get-physicalDisk
           Add-PhysicalDisk -StoragePoolFriendlyName "Pool" -PhysicalDisks (Get-PhysicalDisk -FriendlyName PhysicalDisk2)
