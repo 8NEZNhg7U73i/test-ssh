@@ -16,6 +16,7 @@ jobs:
           echo list disk > disk
           echo create vdisk file=c:\c.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
+          echo convert mbr >> disk
           diskpart /s disk
 
       - name: set hdd vdisk
@@ -37,6 +38,7 @@ jobs:
           echo list disk > disk
           echo create vdisk file=d:\d.vhd maximum=10240 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
+          echo convert mbr >> disk
           diskpart /s disk
 
       - name: set ssd vdisk
@@ -44,19 +46,18 @@ jobs:
         run: |
           Set-PhysicalDisk -FriendlyName "Msft Virtual Disk" -MediaType SSD   
 
-      - name: detach hdd vdisk
+      - name: attach hdd vdisk
         shell: cmd
         run: |
           echo list disk > disk
-          echo select vdisk file=d:\d.vhd
-          echo detach vdisk >> disk
+          echo select vdisk file=c:\c.vhd
+          echo attach vdisk >> disk
           diskpart /s disk
 
       - name: create pool
         shell: powershell
         run: |
-          New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
-          Get-VirtualDisk
+          #New-StoragePool -FriendlyName Data -StorageSubsystemFriendlyName "*Storage*" -PhysicalDisks (Get-PhysicalDisk -CanPool $True)
 
       - name: list disk
         shell: powershell
