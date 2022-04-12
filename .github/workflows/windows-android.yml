@@ -62,6 +62,7 @@ jobs:
           New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD
+          Get-StorageTier
           if ($SSDTierSize -eq $null){
             $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
             $SSDTierSize = [int64]($SSDTierSize * $TierUsableSpace)
