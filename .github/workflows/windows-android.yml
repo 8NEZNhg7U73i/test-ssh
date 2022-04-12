@@ -26,22 +26,20 @@ jobs:
           install-module vhdx -force
           Install-Module WindowsImageTools -force
 
-      - name: ceeate vdisk
+      - name: create vdisk
         shell: powershell
         run: |
-          $HDDSize = $null
-          $SSDSize = $null
-          $HDDUsableSpace = 0.95
-          $SSDUsableSpace = 0.95
-          if ($HDDSize -eq $null){
-            $HDDSize = [int64]((get-volume -driveletter c).sizeremaining * $HDDUsableSpace)
-          }
-          if ($SSDSize -eq $null){
-            $SSDSize = [int64]((get-volume -driveletter d).sizeremaining * $SSDUsableSpace)
-          }
-          new-vhdx -path c:\c.vhdx -type fixed -size $HDDSize
+          $DiskLayout = $null
+          $HDDSize = (get-volume -driveletter c).sizeremaining
+          $SSDSize = (get-volume -driveletter d).sizeremaining
+          $HDDUsableSpace = 0.98
+          $SSDUsableSpace = 0.98
+          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
+          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
+          #new-vhdx -path c:\c.vhdx -type fixed -size $HDDSize
+          new-datavhd -path c:\test.vhdx -size $HDDSize
           mount-diskimage c:\c.vhdx
-          new-vhdx -path d:\d.vhdx -type fixed -size $SSDSize
+          #new-vhdx -path d:\d.vhdx -type fixed -size $SSDSize
           mount-diskimage d:\d.vhdx
 
       - name: create pool
