@@ -21,7 +21,7 @@ jobs:
           echo convert mbr >> disk
           diskpart /s disk
 
-      - name: install vhdx module
+      - name: install vhd module
         shell: powershell
         run: |
           Install-Module WindowsImageTools -force
@@ -32,37 +32,36 @@ jobs:
           $DiskLayout = $null
           $HDDSize = (get-volume -driveletter c).sizeremaining
           $SSDSize = (get-volume -driveletter d).sizeremaining
-          $HDDUsableSpace = 0.98
-          $SSDUsableSpace = 0.98
+          $HDDUsableSpace = 0.99
+          $SSDUsableSpace = 0.99
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
-          new-datavhd -path c:\c.vhd -size $HDDSize
+          new-datavhd -path c:\c.vhd -size $HDDSize -dynamic
           mount-diskimage c:\c.vhd
-          new-datavhd -path d:\d.vhdx -size $SSDSize
-          mount-diskimage d:\d.vhdx
+          new-datavhd -path d:\d.vhd -size $SSDSize -dynamic
+          mount-diskimage d:\d.vhd
 
       - name: create pool
         shell: powershell
         run: |
-          $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhdx"
-          $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhdx"
+          $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
           $hddphy | Clear-Disk -RemoveData -RemoveOEM -confirm:$false
           $ssdphy | Clear-Disk -RemoveData -RemoveOEM -confirm:$false
-          $hddphy | Initialize-Disk -PartitionStyle MBR
-          $ssdphy | Initialize-Disk -PartitionStyle MBR
-          Set-PhysicalDisk -InputObject $hdd -MediaType HDD
-          Set-PhysicalDisk -InputObject $ssd -MediaType SSD
+          $hdd | Reset-PhysicalDisk
+          $ssd | Reset-PhysicalDisk
+          $hdd | Set-PhysicalDisk -MediaType HDD
+          $ssd | Set-PhysicalDisk -MediaType SSD
           $SSDTierSize = $null
           $WriteCacheSize= $null
           $HDDTierSize = $null
           $TierUsableSpace = 1
           $WriteCacheSpace = 0.5
           New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
-          Get-StoragePool -FriendlyName vg | Get-PhysicalDisk | Select FriendlyName, MediaType
-          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName $SSDTierName -MediaType SSD
-          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName $HDDTierName -MediaType HDD
+          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
+          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD
           if ($SSDTierSize -eq $null){
             $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
             $SSDTierSize = [int64]($SSDTierSize * $TierUsableSpace)
@@ -75,7 +74,7 @@ jobs:
             $WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
           }
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
-          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize $WriteCacheSize -AutoWriteCacheSize -AutoNumberOfColumns
+          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize $WriteCacheSize -AutoNumberOfColumns
           Write-Output "preparing volume"
           Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
           Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
