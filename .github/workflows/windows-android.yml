@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: create vdisk
         shell: cmd
+        if: github.event_name == 'rase'
         run: |
           echo create vdisk file=c:\cc.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
@@ -23,7 +24,6 @@ jobs:
       - name: install vhdx module
         shell: powershell
         run: |
-          install-module vhdx -force
           Install-Module WindowsImageTools -force
 
       - name: create vdisk
@@ -36,10 +36,9 @@ jobs:
           $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
-          #new-vhdx -path c:\c.vhdx -type fixed -size $HDDSize
-          new-datavhd -path c:\test.vhdx -size $HDDSize
+          new-datavhd -path c:\c.vhdx -size $HDDSize
           mount-diskimage c:\c.vhdx
-          #new-vhdx -path d:\d.vhdx -type fixed -size $SSDSize
+          new-datavhd -path d:\d.vhdx -size $SSDSize
           mount-diskimage d:\d.vhdx
 
       - name: create pool
@@ -50,22 +49,27 @@ jobs:
           Set-PhysicalDisk -InputObject $hdd -MediaType HDD
           Set-PhysicalDisk -InputObject $ssd -MediaType SSD
           $SSDTierSize = $null
+          $WriteCacheSize= $null
           $HDDTierSize = $null
           $TierUsableSpace = 1
+          $WriteCacheSpace = 0.5
           New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
           Get-StoragePool -FriendlyName vg | Get-PhysicalDisk | Select FriendlyName, MediaType
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName $SSDTierName -MediaType SSD
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName $HDDTierName -MediaType HDD
           if ($SSDTierSize -eq $null){
-          $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
-          $SSDTierSize = [int64]($SSDTierSize * $TierUsableSpace)
+            $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
+            $SSDTierSize = [int64]($SSDTierSize * $TierUsableSpace)
           }
           if ($HDDTierSize -eq $null){
-          $HDDTierSize = (Get-StorageTierSupportedSize -FriendlyName HDDTier -ResiliencySettingName Simple).TierSizeMax
-          $HDDTierSize = [int64]($HDDTierSize * $TierUsableSpace)
+            $HDDTierSize = (Get-StorageTierSupportedSize -FriendlyName HDDTier -ResiliencySettingName Simple).TierSizeMax
+            $HDDTierSize = [int64]($HDDTierSize * $TierUsableSpace)
+          }
+          if ($WriteCacheSize -eq $null){
+            $WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
           }
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
-          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple -AutoWriteCacheSize -AutoNumberOfColumns
+          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize $WriteCacheSize -AutoWriteCacheSize -AutoNumberOfColumns
           Write-Output "preparing volume"
           Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
           Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
