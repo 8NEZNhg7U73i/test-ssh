@@ -36,16 +36,22 @@ jobs:
           $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
-          new-datavhd -path c:\c.vhdx -size $HDDSize
-          mount-diskimage c:\c.vhdx
+          new-datavhd -path c:\c.vhd -size $HDDSize
+          mount-diskimage c:\c.vhd
           new-datavhd -path d:\d.vhdx -size $SSDSize
           mount-diskimage d:\d.vhdx
 
       - name: create pool
         shell: powershell
         run: |
-          $hdd = get-disk -number 2 | Get-physicaldisk
-          $ssd = get-disk -number 3 | Get-physicaldisk
+          $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhdx"
+          $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhdx"
+          $hddphy = $hdd | get-disk
+          $ssdphy = $ssd | get-disk
+          $hddphy | Clear-Disk -RemoveData -RemoveOEM -confirm:$false
+          $ssdphy | Clear-Disk -RemoveData -RemoveOEM -confirm:$false
+          $hddphy | Initialize-Disk -PartitionStyle MBR
+          $ssdphy | Initialize-Disk -PartitionStyle MBR
           Set-PhysicalDisk -InputObject $hdd -MediaType HDD
           Set-PhysicalDisk -InputObject $ssd -MediaType SSD
           $SSDTierSize = $null
