@@ -59,7 +59,8 @@ jobs:
           $SSDTierSize = $null
           $WriteCacheSize= $null
           $HDDTierSize = $null
-          $TierUsableSpace = 0.9
+          $HDDTierUsableSpace = 0.8
+          $SSDTierUsableSpace = 0.95
           $WriteCacheSpace = 0.5
           New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
@@ -67,11 +68,11 @@ jobs:
           Get-StorageTier
           if ($SSDTierSize -eq $null){
             $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
-            $SSDTierSize = [int64]($SSDTierSize * $TierUsableSpace)
+            $SSDTierSize = [int64]($SSDTierSize * $HDDTierUsableSpace)
           }
           if ($HDDTierSize -eq $null){
             $HDDTierSize = (Get-StorageTierSupportedSize -FriendlyName HDDTier -ResiliencySettingName Simple).TierSizeMax
-            $HDDTierSize = [int64]($HDDTierSize * $TierUsableSpace)
+            $HDDTierSize = [int64]($HDDTierSize * $SSDTierUsableSpace)
           }
           if ($WriteCacheSize -eq $null){
             $WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
