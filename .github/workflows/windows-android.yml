@@ -34,6 +34,8 @@ jobs:
         run: |
           $ReseverSpace = 5324351488
           $WriteCacheSpace = 0.5
+          $SSDTierSpace = 0.98
+          $HDDTierSpace = 0.9
           $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
@@ -50,9 +52,9 @@ jobs:
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
           $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
-          $SSDTierSize = [int64]($SSDTierSize - $ReseverSpace)
+          $SSDTierSize = [int64]($SSDTierSize * $SSDTierSpace)
           $HDDTierSize = (Get-StorageTierSupportedSize -FriendlyName HDDTier -ResiliencySettingName Simple).TierSizeMax
-          $HDDTierSize = [int64]($HDDTierSize - $ReseverSpace)
+          $HDDTierSize = [int64]($HDDTierSize * $HDDTierSpace)
           $WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
           New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple
