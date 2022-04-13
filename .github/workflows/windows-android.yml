@@ -12,10 +12,10 @@ jobs:
       - name: create vdisk
         shell: cmd
         run: |
-          echo create vdisk file=c:\c.vhd maximum=87040 type=EXPANDABLE >> disk
+          echo create vdisk file=c:\c.vhd maximum=84492 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
           echo convert mbr >> disk
-          echo create vdisk file=d:\d.vhd maximum=10240 type=EXPANDABLE >> disk
+          echo create vdisk file=d:\d.vhd maximum=12288 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
           echo convert mbr >> disk
           diskpart /s disk      
