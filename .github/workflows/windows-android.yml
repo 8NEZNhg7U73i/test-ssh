@@ -38,8 +38,8 @@ jobs:
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
-          $hddphy | get-disk | where partitionstyle -ne raw | clear-disk -confirm:$false
-          $ssdphy | get-disk | where partitionstyle -ne raw | clear-disk -confirm:$false
+          $hddphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false
+          $ssdphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false
           $hddphy | get-disk | where partitionstyle -eq raw | Initialize-Disk -PartitionStyle MBR
           $ssdphy | get-disk | where partitionstyle -eq raw | Initialize-Disk -PartitionStyle MBR
           $hdd | Reset-PhysicalDisk
