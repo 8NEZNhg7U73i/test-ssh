@@ -22,11 +22,11 @@ jobs:
           $SSDSize = (get-volume -driveletter d).sizeremaining
           $HDDUsableSpace = 0.98
           $SSDUsableSpace = 0.98
-          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
-          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
-          new-datavhd -path c:\c.vhd -size $HDDSize
+          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 512 ) )
+          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 512 ) )
+          new-datavhd -path c:\c.vhd -size $HDDSize -dynamic
           mount-diskimage c:\c.vhd
-          new-datavhd -path d:\d.vhd -size $SSDSize
+          new-datavhd -path d:\d.vhd -size $SSDSize -dynamic
           mount-diskimage d:\d.vhd
 
       - name: create pool
