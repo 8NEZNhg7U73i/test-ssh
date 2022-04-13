@@ -20,8 +20,8 @@ jobs:
           $DiskLayout = $null
           $HDDSize = (get-volume -driveletter c).sizeremaining
           $SSDSize = (get-volume -driveletter d).sizeremaining
-          $HDDUsableSpace = 0.99
-          $SSDUsableSpace = 0.99
+          $HDDUsableSpace = 0.98
+          $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
           new-datavhd -path c:\c.vhd -size $HDDSize -dynamic
