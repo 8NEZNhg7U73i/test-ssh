@@ -48,7 +48,7 @@ jobs:
           $ssd | Reset-PhysicalDisk
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
-          New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
+          New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg -ResiliencySettingNameDefault simple
           New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
           $SSDTier = Get-StorageTier -FriendlyName SSDTier 
           New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
