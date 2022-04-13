@@ -35,7 +35,7 @@ jobs:
           $ReseverSpace = 5324351488
           $WriteCacheSpace = 0.5
           $SSDTierSpace = 0.9
-          $HDDTierSpace = 0.9
+          $HDDTierSpace = 0.8
           $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
