@@ -59,7 +59,7 @@ jobs:
           $HDDTierSize = [int64]($HDDTierSize * $HDDTierSpace)
           $WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
-          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier, $HDDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple
+          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($HDDTier, $SSDTier) -StorageTierSizes @($SSDTierSize, $HDDTierSize) -ResiliencySettingName Simple
           #-WriteCacheSize $WriteCacheSize
           $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
           $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
