@@ -24,9 +24,9 @@ jobs:
           $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1024 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1024 ) )
-          new-datavhd -path c:\c.vhd -size $HDDSize -dynamic
+          new-datavhd -path c:\c.vhd -size $HDDSize
           mount-diskimage c:\c.vhd
-          new-datavhd -path d:\d.vhd -size $SSDSize -dynamic
+          new-datavhd -path d:\d.vhd -size $SSDSize
           mount-diskimage d:\d.vhd
 
       - name: create pool
