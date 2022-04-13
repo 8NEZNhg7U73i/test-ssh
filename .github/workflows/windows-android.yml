@@ -50,6 +50,8 @@ jobs:
           $ssdphy = $ssd | get-disk
           $hddphy | Clear-Disk -RemoveData -RemoveOEM -confirm:$false
           $ssdphy | Clear-Disk -RemoveData -RemoveOEM -confirm:$false
+          $hddphy | Initialize-Disk -PartitionStyle MBR
+          $ssdphy | Initialize-Disk -PartitionStyle MBR
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
           $hdd | Set-PhysicalDisk -MediaType HDD
