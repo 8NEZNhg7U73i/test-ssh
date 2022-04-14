@@ -12,13 +12,12 @@ jobs:
       - name: create vdisk
         shell: cmd
         run: |
-          echo create vdisk file=c:\c.vhd maximum=84492 type=EXPANDABLE >> disk
+          echo rem > disk
+          echo create vdisk file=c:\c.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
-          echo convert mbr >> disk
-          echo create vdisk file=d:\d.vhd maximum=12288 type=EXPANDABLE >> disk
+          echo create vdisk file=d:\d.vhd maximum=10240 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
-          echo convert mbr >> disk
-          diskpart /s disk      
+          diskpart /s disk
 
       - name: install vhd module
         if: github.event_name == 'rase'
@@ -32,51 +31,66 @@ jobs:
         run: |
           $HDDSize = (get-volume -driveletter c).sizeremaining
           $SSDSize = (get-volume -driveletter d).sizeremaining
-          $HDDUsableSpace = 1
-          $SSDUsableSpace = 1
+          $HDDUsableSpace = 0.98
+          $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 512 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 512 ) )
           new-datavhd -path c:\c.vhd -size $HDDSize -dynamic
-          mount-diskimage c:\c.vhd
           new-datavhd -path d:\d.vhd -size $SSDSize -dynamic
+          mount-diskimage c:\c.vhd
           mount-diskimage d:\d.vhd
-
-      - name: create pool
-        shell: powershell
-        run: |
-          $ReseverSpace = 5324351488
-          $WriteCacheSpace = 0.5
-          $SSDTierSpace = 0.98
-          $HDDTierSpace = 0.9
           $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
           $hddphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false
-          $ssdphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false
+          $ssdphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false          
+
+      - name: create pool
+        shell: powershell
+        run: |
+          $WriteCacheSpace = 0.5
+          $SSDTierSpace = 0.95
+          $HDDTierSpace = 0.95
+          $SSDTierReseverDivisorBlock = 16
+          $HDDTierReseverDivisorBlock = 4
+          $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
+          $hddphy = $hdd | get-disk
+          $ssdphy = $ssd | get-disk
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
-          New-StoragePool -PhysicalDisks (Get-PhysicalDisk -CanPool $True | Where MediaType -NE UnSpecified) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
+          #New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
+          New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -EnclosureAwareDefault $False -ProvisioningTypeDefault Fixed -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD
-          $SSDTierSize = (Get-StorageTierSupportedSize -FriendlyName SSDTier -ResiliencySettingName Simple).TierSizeMax
-          $SSDTierSize = [int64]($SSDTierSize * $SSDTierSpace)
-          $HDDTierSize = (Get-StorageTierSupportedSize -FriendlyName HDDTier -ResiliencySettingName Simple).TierSizeMax
-          $HDDTierSize = [int64]($HDDTierSize * $HDDTierSpace)
-          $WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
+          $SSDTierDivisor = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
+          $HDDTierDivisor = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
+          $SSDTierSizeMax = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
+          $HDDTierSizeMax = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
+          $SSDTierDivisorBlockMax = [int64][math]::Round( $SSDTierSizeMax / $SSDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
+          $HDDTierDivisorBlockMax = [int64][math]::Round( $HDDTierSizeMax / $HDDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
+          #$SSDTierSize = [int64]( $SSDTierSizeMax * $SSDTierSpace - $SSDTierSizeMax * $SSDTierSpace % $SSDTierDivisor )
+          #$HDDTierSize = [int64]( $HDDTierSizeMax * $HDDTierSpace - $HDDTierSizeMax * $HDDTierSpace % $HDDTierDivisor )
+          $SSDTierSize = [int64]( ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock) * $SSDTierDivisor)
+          $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $HDDTierDivisor)
+          write-output "DiskDivisorSizes: ( $SSDTierDivisor, $HDDTierDivisor )"
+          write-output "DiskTierSizeMax: ( $SSDTierSizeMax , $HDDTierSizeMax )"
+          write-output "DiskTierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
+          $SSDSize = [int64]($ssd | get-physicaldisk | select size).size
+          $HDDSize = [int64]($hdd | get-physicaldisk | select size).size
           $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
           $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
-          write-output "SSDRemain: $SSDRemain"
-          write-output "HDDRemain: $HDDRemain"
-          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($HDDTier, $SSDTier) -StorageTierSizes @($HDDTierSize, $SSDTierSize) -ResiliencySettingName Simple
-          #-WriteCacheSize $WriteCacheSize
+          #$WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
+          write-output "DiskRemain: ( $SSDRemain , $HDDRemain )"
+          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple
+          # -WriteCacheSize $WriteCacheSize
           $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
           $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
-          write-output "SSDRemain: $SSDRemain"
-          write-output "HDDRemain: $HDDRemain"
+          write-output "DiskRemain: ( $SSDRemain, $HDDRemain )"
           Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
           Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
           Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
