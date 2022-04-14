@@ -21,7 +21,7 @@ jobs:
           diskpart /s disk
 
       - name: install vhd module
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         shell: powershell
         run: |
           Install-Module WindowsImageTools -force
