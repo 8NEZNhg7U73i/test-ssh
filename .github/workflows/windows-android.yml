@@ -60,6 +60,8 @@ jobs:
           $ssdphy = $ssd | get-disk
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
+          $hdd | Reset-PhysicalDisk
+          $ssd | Reset-PhysicalDisk
           #New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
           New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -EnclosureAwareDefault $False -ProvisioningTypeDefault Fixed -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
