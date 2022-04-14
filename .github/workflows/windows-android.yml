@@ -52,8 +52,8 @@ jobs:
           $WriteCacheSpace = 0.5
           $SSDTierSpace = 0.95
           $HDDTierSpace = 0.95
-          $SSDTierReseverDivisorBlock = 5
-          $HDDTierReseverDivisorBlock = 5
+          $SSDTierReseverDivisorBlock = 8
+          $HDDTierReseverDivisorBlock = 8
           $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
@@ -62,22 +62,26 @@ jobs:
           $ssd | Set-PhysicalDisk -MediaType SSD
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
-          #New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
-          New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -EnclosureAwareDefault $False -ProvisioningTypeDefault Fixed -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
+          New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
+          #New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -EnclosureAwareDefault $False -ProvisioningTypeDefault Fixed -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
-          $SSDTierDivisor = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
-          $HDDTierDivisor = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
           $SSDTierSizeMax = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
           $HDDTierSizeMax = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
+          write-output "DiskTierSizeMax: ( $SSDTierSizeMax , $HDDTierSizeMax )"
+          $SSDTierDivisor = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
+          $HDDTierDivisor = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
+          $hdd | Reset-PhysicalDisk
+          $ssd | Reset-PhysicalDisk
+          while (($SSDTierDivisor -eq 0) -or ($HDDTierDivisor -eq 0)){
           $SSDTierDivisorBlockMax = [int64][math]::Round( $SSDTierSizeMax / $SSDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
           $HDDTierDivisorBlockMax = [int64][math]::Round( $HDDTierSizeMax / $HDDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
+          }
           #$SSDTierSize = [int64]( $SSDTierSizeMax * $SSDTierSpace - $SSDTierSizeMax * $SSDTierSpace % $SSDTierDivisor )
           #$HDDTierSize = [int64]( $HDDTierSizeMax * $HDDTierSpace - $HDDTierSizeMax * $HDDTierSpace % $HDDTierDivisor )
           $SSDTierSize = [int64]( ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock) * $SSDTierDivisor)
           $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $HDDTierDivisor)
           write-output "DiskDivisorSizes: ( $SSDTierDivisor, $HDDTierDivisor )"
-          write-output "DiskTierSizeMax: ( $SSDTierSizeMax , $HDDTierSizeMax )"
           write-output "DiskTierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
           $SSDSize = [int64]($ssd | get-physicaldisk | select size).size
