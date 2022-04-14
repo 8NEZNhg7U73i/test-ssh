@@ -10,6 +10,7 @@ jobs:
 
     steps:
       - name: create vdisk
+        if: github.event_name == 'rase'
         shell: cmd
         run: |
           echo rem > disk
@@ -27,7 +28,6 @@ jobs:
 
       - name: create vdisk
         shell: powershell
-        if: github.event_name == 'rase'
         run: |
           $HDDSize = (get-volume -driveletter c).sizeremaining
           $SSDSize = (get-volume -driveletter d).sizeremaining
@@ -52,14 +52,12 @@ jobs:
           $WriteCacheSpace = 0.5
           $SSDTierSpace = 0.95
           $HDDTierSpace = 0.95
-          $SSDTierReseverDivisorBlock = 16
+          $SSDTierReseverDivisorBlock = 4
           $HDDTierReseverDivisorBlock = 4
           $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
-          $hdd | Reset-PhysicalDisk
-          $ssd | Reset-PhysicalDisk
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
           #New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
@@ -88,6 +86,8 @@ jobs:
           write-output "DiskRemain: ( $SSDRemain , $HDDRemain )"
           New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple
           # -WriteCacheSize $WriteCacheSize
+          $lv = get-virtualdisk lv
+          if ($lv -ne $null) {
           $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
           $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
           write-output "DiskRemain: ( $SSDRemain, $HDDRemain )"
@@ -95,6 +95,7 @@ jobs:
           Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
           Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
           Get-Volume -DriveLetter Z
+          }
 
       - name: list disk
         shell: powershell
