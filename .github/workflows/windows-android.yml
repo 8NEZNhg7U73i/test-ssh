@@ -79,8 +79,8 @@ jobs:
           $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $($HDDTierSupportedSize.TierSizeDivisor) )
           #$SSDAllocated = [int64]$($ssd.allocatedsize)
           #$HDDAllocated = [int64]$($hdd.allocatedsize)
-          $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
-          $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
+          $SSDRemain = [int64]( $($ssdphy.size) - $($ssdphy.allocatedsize) )
+          $HDDRemain = [int64]( $($hddphy.size) - $($hddphy.allocatedsize) )
           $WriteCacheSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $WriteCacheSpace )
           Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"
           Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )"
