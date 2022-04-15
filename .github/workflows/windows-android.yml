@@ -52,42 +52,30 @@ jobs:
           $WriteCacheSpace = 0.5
           $SSDTierSpace = 0.95
           $HDDTierSpace = 0.95
-          $SSDTierReseverDivisorBlock = 8
-          $HDDTierReseverDivisorBlock = 8
+          $SSDTierReseverDivisorBlock = 4
+          $HDDTierReseverDivisorBlock = 4
           $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
-          $hdd | Reset-PhysicalDisk
-          $ssd | Reset-PhysicalDisk
           #New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
-          New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
-          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
-          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
-          $SSDTierSizeMax = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
-          $HDDTierSizeMax = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
-          write-output "DiskTierSizeMax: ( $SSDTierSizeMax , $HDDTierSizeMax )"
+          New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -EnclosureAwareDefault $False -ProvisioningTypeDefault Fixed -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
+          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
+          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD
           $SSDTierDivisor = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
           $HDDTierDivisor = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
-          $hdd | Reset-PhysicalDisk
-          $ssd | Reset-PhysicalDisk
-          while (($SSDTierDivisor -eq 0) -or ($HDDTierDivisor -eq 0)){
-            if (($SSDTierDivisor -ne 0) -or ($HDDTierDivisor -ne 0)){
+          $SSDTierSizeMax = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
+          $HDDTierSizeMax = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
           $SSDTierDivisorBlockMax = [int64][math]::Round( $SSDTierSizeMax / $SSDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
           $HDDTierDivisorBlockMax = [int64][math]::Round( $HDDTierSizeMax / $HDDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
-          $hdd | Reset-PhysicalDisk
-          $ssd | Reset-PhysicalDisk
-          $SSDTier | Get-StorageTier 
-          $HDDTier | Get-StorageTier
-          }
-          }
           #$SSDTierSize = [int64]( $SSDTierSizeMax * $SSDTierSpace - $SSDTierSizeMax * $SSDTierSpace % $SSDTierDivisor )
           #$HDDTierSize = [int64]( $HDDTierSizeMax * $HDDTierSpace - $HDDTierSizeMax * $HDDTierSpace % $HDDTierDivisor )
           $SSDTierSize = [int64]( ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock) * $SSDTierDivisor)
           $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $HDDTierDivisor)
           write-output "DiskDivisorSizes: ( $SSDTierDivisor, $HDDTierDivisor )"
+          write-output "DiskTierSizeMax: ( $SSDTierSizeMax , $HDDTierSizeMax )"
           write-output "DiskTierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
           $SSDSize = [int64]($ssd | get-physicaldisk | select size).size
@@ -108,6 +96,7 @@ jobs:
           Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
           Get-Volume -DriveLetter Z
           }
+
 
       - name: list disk
         shell: powershell
