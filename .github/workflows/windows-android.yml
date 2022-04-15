@@ -77,6 +77,10 @@ jobs:
             if (($SSDTierDivisor -ne 0) -or ($HDDTierDivisor -ne 0)){
           $SSDTierDivisorBlockMax = [int64][math]::Round( $SSDTierSizeMax / $SSDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
           $HDDTierDivisorBlockMax = [int64][math]::Round( $HDDTierSizeMax / $HDDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
+          $hdd | Reset-PhysicalDisk
+          $ssd | Reset-PhysicalDisk
+          $SSDTier | Get-StorageTier 
+          $HDDTier | Get-StorageTier
           }
           }
           #$SSDTierSize = [int64]( $SSDTierSizeMax * $SSDTierSpace - $SSDTierSizeMax * $SSDTierSpace % $SSDTierDivisor )
