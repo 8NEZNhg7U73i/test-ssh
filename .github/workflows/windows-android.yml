@@ -61,7 +61,8 @@ jobs:
           $ssdphy = $ssd | get-disk
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
-          #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg -ResiliencySettingName Simple
+          #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
+          #-ResiliencySettingName Simple
           $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -ResiliencySettingName Simple
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
