@@ -54,7 +54,7 @@ jobs:
           $SSDTierSpace = 0.95
           $HDDTierSpace = 0.95
           $SSDTierReseverDivisorBlock = 8
-          $HDDTierReseverDivisorBlock = 8
+          $HDDTierReseverDivisorBlock = 15
           $hdd = get-physicaldisk | where physicallocation -eq "C:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "D:\d.vhd"
           $hddphy = $hdd | get-disk
