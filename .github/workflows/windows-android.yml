@@ -14,9 +14,9 @@ jobs:
         shell: cmd
         run: |
           echo rem > disk
-          echo create vdisk file=C:\c.vhd maximum=87040 type=EXPANDABLE >> disk
+          echo create vdisk file=C:\C.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
-          echo create vdisk file=D:\d.vhd maximum=10240 type=EXPANDABLE >> disk
+          echo create vdisk file=D:\D.vhd maximum=10240 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
           diskpart /s disk
 
@@ -36,12 +36,12 @@ jobs:
           $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1048576 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1048576 ) )
-          new-datavhd -path C:\c.vhd -size $HDDSize -dynamic
-          new-datavhd -path D:\d.vhd -size $SSDSize -dynamic
-          mount-diskimage C:\c.vhd
-          mount-diskimage D:\d.vhd
-          $hdd = get-physicaldisk | where physicallocation -eq "C:\c.vhd"
-          $ssd = get-physicaldisk | where physicallocation -eq "D:\d.vhd"
+          new-datavhd -path C:\C.vhd -size $HDDSize -dynamic
+          new-datavhd -path D:\D.vhd -size $SSDSize -dynamic
+          mount-diskimage C:\C.vhd
+          mount-diskimage D:\D.vhd
+          $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
           $hddphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false
@@ -55,8 +55,8 @@ jobs:
           $HDDTierSpace = 0.95
           $SSDTierReseverDivisorBlock = 4
           $HDDTierReseverDivisorBlock = 8
-          $hdd = get-physicaldisk | where physicallocation -eq "C:\c.vhd"
-          $ssd = get-physicaldisk | where physicallocation -eq "D:\d.vhd"
+          $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
           $hdd | Reset-PhysicalDisk
