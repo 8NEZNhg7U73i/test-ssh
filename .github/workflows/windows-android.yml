@@ -54,7 +54,7 @@ jobs:
           $SSDTierSpace = 0.95
           $HDDTierSpace = 0.95
           $SSDTierReseverDivisorBlock = 8
-          $HDDTierReseverDivisorBlock = 12
+          $HDDTierReseverDivisorBlock = 10
           $hdd = get-physicaldisk | where physicallocation -eq "C:\c.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "D:\d.vhd"
           $hddphy = $hdd | get-disk
@@ -75,8 +75,10 @@ jobs:
           $HDDTierDivisorBlockMax = [int64][math]::Round( $($HDDTierSupportedSize.TierSizeMax) / $($HDDTierSupportedSize.TierSizeDivisor) , [MidpointRounding]::ToNegativeInfinity )
           #$SSDTierSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $SSDTierSpace - $($SSDTierSupportedSize.TierSizeMax) * $SSDTierSpace % $($SSDTierSupportedSize.TierSizeDivisor) )
           #$HDDTierSize = [int64]( $($HDDTierSupportedSize.TierSizeMax) * $HDDTierSpace - $($HDDTierSupportedSize.TierSizeMax) * $HDDTierSpace % $($HDDTierSupportedSize.TierSizeDivisor) )
-          $SSDTierSize = [int64]( ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock) * $($SSDTierSupportedSize.TierSizeDivisor) )
-          $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $($HDDTierSupportedSize.TierSizeDivisor) )
+          $SSDTierDivisorBlock = ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock)
+          $HDDTierDivisorBlock = ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock)
+          $SSDTierSize = [int64]( $SSDTierDivisorBlock * $($SSDTierSupportedSize.TierSizeDivisor) )
+          $HDDTierSize = [int64]( $HDDTierDivisorBlock * $($HDDTierSupportedSize.TierSizeDivisor) )
           #$SSDAllocated = [int64]$($ssd.allocatedsize)
           #$HDDAllocated = [int64]$($hdd.allocatedsize)
           $SSDRemain = [int64]( $($ssdphy.size) - $($ssdphy.allocatedsize) )
@@ -85,11 +87,11 @@ jobs:
           Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"
           Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )"
           Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
+          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )"
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
           Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
-          $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple
+          $lv = $( $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple )
           # -WriteCacheSize $WriteCacheSize
-          $lv = get-virtualdisk lv
           if ($lv -ne $null) {
             $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
             $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
