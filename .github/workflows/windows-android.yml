@@ -100,21 +100,13 @@ jobs:
             Get-Volume -DriveLetter Z
           }
 
-      - name: list disk
+      - name: list something
         shell: powershell
-        run: get-disk
-
-      - name: list physicalDisk
-        shell: powershell
-        run: get-physicalDisk
-
-      - name: list partition
-        shell: powershell
-        run: get-partition
-
-      - name: list volume
-        shell: powershell
-        run: get-volume
+        run: |
+          get-disk
+          get-physicalDisk
+          get-partition
+          get-volume
 
       - uses: actions/checkout@v2
 
