@@ -63,7 +63,7 @@ jobs:
           $ssd | Reset-PhysicalDisk
           #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
           #-ResiliencySettingName Simple
-          $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
+          $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -EnclosureAwareDefault $False -LogicalSectorSizeDefault 512 -ResiliencySettingNameDefault Simple -WriteCacheSizeDefault 0
           # -ResiliencySettingName Simple
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
