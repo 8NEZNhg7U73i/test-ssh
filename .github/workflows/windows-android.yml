@@ -5,7 +5,7 @@ on:
     branches: master
 
 jobs:
-  build:
+  builD:
     runs-on: windows-2019
 
     steps:
@@ -14,9 +14,9 @@ jobs:
         shell: cmd
         run: |
           echo rem > disk
-          echo create vdisk file=c:\c.vhd maximum=87040 type=EXPANDABLE >> disk
+          echo create vdisk file=C:\c.vhd maximum=87040 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
-          echo create vdisk file=d:\d.vhd maximum=10240 type=EXPANDABLE >> disk
+          echo create vdisk file=D:\d.vhd maximum=10240 type=EXPANDABLE >> disk
           echo attach vdisk >> disk
           diskpart /s disk
 
@@ -35,12 +35,12 @@ jobs:
           $SSDUsableSpace = 0.98
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 512 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 512 ) )
-          new-datavhd -path c:\c.vhd -size $HDDSize -dynamic
-          new-datavhd -path d:\d.vhd -size $SSDSize -dynamic
-          mount-diskimage c:\c.vhd
-          mount-diskimage d:\d.vhd
-          $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
-          $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
+          new-datavhd -path C:\c.vhd -size $HDDSize -dynamic
+          new-datavhd -path D:\d.vhd -size $SSDSize -dynamic
+          mount-diskimage C:\c.vhd
+          mount-diskimage D:\d.vhd
+          $hdd = get-physicaldisk | where physicallocation -eq "C:\c.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "D:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
           $hddphy | get-disk | where partitionstyle -ne raw | clear-disk -RemoveData -confirm:$false
@@ -54,51 +54,49 @@ jobs:
           $HDDTierSpace = 0.95
           $SSDTierReseverDivisorBlock = 4
           $HDDTierReseverDivisorBlock = 4
-          $hdd = get-physicaldisk | where physicallocation -eq "c:\c.vhd"
-          $ssd = get-physicaldisk | where physicallocation -eq "d:\d.vhd"
+          $hdd = get-physicaldisk | where physicallocation -eq "C:\c.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "D:\d.vhd"
           $hddphy = $hdd | get-disk
           $ssdphy = $ssd | get-disk
-          $hdd | Set-PhysicalDisk -MediaType HDD
-          $ssd | Set-PhysicalDisk -MediaType SSD
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
-          #New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg
-          New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -EnclosureAwareDefault $False -ProvisioningTypeDefault Fixed -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
-          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
-          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD
-          $SSDTierDivisor = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
-          $HDDTierDivisor = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeDivisor
-          $SSDTierSizeMax = ($SSDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
-          $HDDTierSizeMax = ($HDDTier | Get-StorageTierSupportedSize -ResiliencySettingName Simple).TierSizeMax
-          $SSDTierDivisorBlockMax = [int64][math]::Round( $SSDTierSizeMax / $SSDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
-          $HDDTierDivisorBlockMax = [int64][math]::Round( $HDDTierSizeMax / $HDDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
-          #$SSDTierSize = [int64]( $SSDTierSizeMax * $SSDTierSpace - $SSDTierSizeMax * $SSDTierSpace % $SSDTierDivisor )
-          #$HDDTierSize = [int64]( $HDDTierSizeMax * $HDDTierSpace - $HDDTierSizeMax * $HDDTierSpace % $HDDTierDivisor )
-          $SSDTierSize = [int64]( ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock) * $SSDTierDivisor)
-          $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $HDDTierDivisor)
-          write-output "DiskDivisorSizes: ( $SSDTierDivisor, $HDDTierDivisor )"
-          write-output "DiskTierSizeMax: ( $SSDTierSizeMax , $HDDTierSizeMax )"
-          write-output "DiskTierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
+          #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg -ResiliencySettingName Simple
+          $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -AutoWriteCacheSize $False -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName
+          # -ResiliencySettingName Simple
+          $hdd | Set-PhysicalDisk -MediaType HDD
+          $ssd | Set-PhysicalDisk -MediaType SSD
+          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
+          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
+          $SSDTierSupportedSize = $SSDTier | Get-StorageTierSupportedSize
+          $HDDTierSupportedSize = $HDDTier | Get-StorageTierSupportedSize
+          $SSDTierDivisorBlockMax = [int64][math]::Round( $($SSDTierSupportedSize.TierSizeMax) / $($SSDTierSupportedSize.TierSizeDivisor) , [MidpointRounding]::ToNegativeInfinity )
+          $HDDTierDivisorBlockMax = [int64][math]::Round( $($HDDTierSupportedSize.TierSizeMax) / $($HDDTierSupportedSize.TierSizeDivisor) , [MidpointRounding]::ToNegativeInfinity )
+          #$SSDTierSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $SSDTierSpace - $($SSDTierSupportedSize.TierSizeMax) * $SSDTierSpace % $($SSDTierSupportedSize.TierSizeDivisor) )
+          #$HDDTierSize = [int64]( $($HDDTierSupportedSize.TierSizeMax) * $HDDTierSpace - $($HDDTierSupportedSize.TierSizeMax) * $HDDTierSpace % $($HDDTierSupportedSize.TierSizeDivisor) )
+          $SSDTierSize = [int64]( ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock) * $($SSDTierSupportedSize.TierSizeDivisor) )
+          $HDDTierSize = [int64]( ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock) * $($HDDTierSupportedSize.TierSizeDivisor) )
+          #$SSDAllocated = [int64]$($ssd.allocatedsize)
+          #$HDDAllocated = [int64]$($hdd.allocatedsize)
+          $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
+          $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
+          $WriteCacheSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $WriteCacheSpace )
+          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"
+          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )"
+          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
-          $SSDSize = [int64]($ssd | get-physicaldisk | select size).size
-          $HDDSize = [int64]($hdd | get-physicaldisk | select size).size
-          $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
-          $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
-          #$WriteCacheSize = [int64]($SSDTierSize * $WriteCacheSpace)
-          write-output "DiskRemain: ( $SSDRemain , $HDDRemain )"
-          New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple
+          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
+          $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple
           # -WriteCacheSize $WriteCacheSize
           $lv = get-virtualdisk lv
           if ($lv -ne $null) {
-          $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
-          $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
-          write-output "DiskRemain: ( $SSDRemain, $HDDRemain )"
-          Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
-          Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
-          Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
-          Get-Volume -DriveLetter Z
+            $SSDRemain = [int64]( ($ssd | get-physicaldisk | select size).size - ($ssd | get-physicaldisk | select allocatedsize).allocatedsize)
+            $HDDRemain = [int64]( ($hdd | get-physicaldisk | select size).size - ($hdd | get-physicaldisk | select allocatedsize).allocatedsize)
+            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )"
+            Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
+            Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
+            Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
+            Get-Volume -DriveLetter Z
           }
-
 
       - name: list disk
         shell: powershell
@@ -123,8 +121,8 @@ jobs:
         run: |
           wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile Everything-1.4.1.1015.x64.en-US.zip
           wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile ES-1.1.0.23.zip
-          wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile c:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
-          wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile c:\users\runneradmin\ES-1.1.0.23.zip
+          wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile C:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
+          wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile C:\users\runneradmin\ES-1.1.0.23.zip
 
       - name: Unzip everything
         shell: cmd
