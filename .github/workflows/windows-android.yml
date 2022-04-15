@@ -74,8 +74,10 @@ jobs:
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
           while (($SSDTierDivisor -eq 0) -or ($HDDTierDivisor -eq 0)){
+            if (($SSDTierDivisor -ne 0) -or ($HDDTierDivisor -ne 0)){
           $SSDTierDivisorBlockMax = [int64][math]::Round( $SSDTierSizeMax / $SSDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
           $HDDTierDivisorBlockMax = [int64][math]::Round( $HDDTierSizeMax / $HDDTierDivisor , [MidpointRounding]::ToNegativeInfinity )
+          }
           }
           #$SSDTierSize = [int64]( $SSDTierSizeMax * $SSDTierSpace - $SSDTierSizeMax * $SSDTierSpace % $SSDTierDivisor )
           #$HDDTierSize = [int64]( $HDDTierSizeMax * $HDDTierSpace - $HDDTierSizeMax * $HDDTierSpace % $HDDTierDivisor )
