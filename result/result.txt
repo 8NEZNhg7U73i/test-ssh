@@ -1,3 +1,16 @@
+440a48e
+DiskSize: ( 95563022336 , 12884901888 )
+Create StoragePool
+DivisorSizes: ( 268435456, 268435456 )
+TierSizeMax: ( 10737418240 , 94489280512 )
+TierDivisorBlockMax: ( 40 , 352 )
+TierDivisorBlock: ( 36 , 348 )
+TierReseverDivisorBlock: ( 4 , 4 )
+TierSizes: ( 9663676416 , 93415538688 )
+DiskRemain: ( 12882804736 , 95560925184 )
+DiskAllocated: ( 2097152 , 2097152 )
+Create Virtualdisk
+
 2b0f989
 DiskSize: ( 94489280512 , 12884901888 )
 Create StoragePool
