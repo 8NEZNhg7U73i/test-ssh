@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: create report text
         shell: powershell
-        run: New-Item C:\c.report.txt
+        run: New-Item C:\report.txt
 
       - name: create vdisk
         if: github.event_name == 'rase'
