@@ -32,8 +32,8 @@ jobs:
         run: |
           $HDDSize = (get-volume -driveletter c).sizeremaining
           $SSDSize = (get-volume -driveletter d).sizeremaining
-          $HDDUsableSpace = 0.99
-          $SSDUsableSpace = 0.99
+          $HDDUsableSpace = 0.97
+          $SSDUsableSpace = 0.97
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 2147483648 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 2147483648 ) )
           new-datavhd -path C:\C.vhd -size $HDDSize -dynamic -Confirm:$false -force
