@@ -161,7 +161,7 @@ jobs:
         with:
           files: C:\report.txt
           tag_name: ${{ github.sha }}
-          body_path: C:\Release.txt
+          body_path: C:\report.txt
 
       - name: Start SSH session
         uses: luchihoratiu/debug-via-ssh@main
