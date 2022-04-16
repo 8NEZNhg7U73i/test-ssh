@@ -13,7 +13,7 @@ jobs:
         shell: powershell
         run: |
           New-Item C:\report.txt
-          $sha = $${{ Github.sha }}
+          $sha = ${{ Github.sha }}
           $sha = $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
 
       - name: create vdisk
@@ -150,7 +150,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: C:\report.txt
-          tag_name: "storagetest${{ github.sha }}"
+          tag_name: "storagetest"
           body_Path: C:\report.txt
 
       - name: Start SSH session
