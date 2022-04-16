@@ -1,3 +1,16 @@
+2b0f989
+DiskSize: ( 94489280512 , 12884901888 )
+Create StoragePool
+DivisorSizes: ( 268435456, 268435456 )
+TierSizeMax: ( 10737418240 , 93415538688 )
+TierDivisorBlockMax: ( 40 , 348 )
+TierDivisorBlock: ( 36 , 344 )
+TierReseverDivisorBlock: ( 4 , 4 )
+TierSizes: ( 9663676416 , 92341796864 )
+DiskRemain: ( 12882804736 , 94487183360 )
+DiskAllocated: ( 2097152 , 2097152 )
+Create Virtualdisk
+
 92b48df
 DiskSize: ( 92341796864 , 10737418240 )
 Create StoragePool
@@ -14,32 +27,6 @@ DiskRemain: ( 2398093312, 1324351488 )
 DiskAllocated: ( 8339324928 , 91017445376 )
 
 bf5e839
-DiskSize: ( 90194313216 , 10737418240 )
-Create StoragePool
-DivisorSizes: ( 268435456, 268435456 )
-TierSizeMax: ( 8589934592 , 89120571392 )
-TierDivisorBlockMax: ( 32 , 332 )
-TierDivisorBlock: ( 28 , 328 )
-TierReseverDivisorBlock: ( 4 , 4 )
-TierSizes: ( 7516192768 , 88046829568 )
-DiskRemain: ( 10735321088 , 90192216064 )
-DiskAllocated: ( 2097152 , 2097152 )
-Create Virtualdisk
-
-2b0f989
-DiskSize: ( 94489280512 , 12884901888 )
-Create StoragePool
-DivisorSizes: ( 268435456, 268435456 )
-TierSizeMax: ( 10737418240 , 93415538688 )
-TierDivisorBlockMax: ( 40 , 348 )
-TierDivisorBlock: ( 36 , 344 )
-TierReseverDivisorBlock: ( 4 , 4 )
-TierSizes: ( 9663676416 , 92341796864 )
-DiskRemain: ( 12882804736 , 94487183360 )
-DiskAllocated: ( 2097152 , 2097152 )
-Create Virtualdisk
-
-91df955
 DiskSize: ( 90194313216 , 10737418240 )
 Create StoragePool
 DivisorSizes: ( 268435456, 268435456 )
