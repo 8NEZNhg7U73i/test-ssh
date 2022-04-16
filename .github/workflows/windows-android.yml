@@ -32,10 +32,10 @@ jobs:
         run: |
           $HDDSize = (get-volume -driveletter c).sizeremaining
           $SSDSize = (get-volume -driveletter d).sizeremaining
-          $HDDUsableSpace = 0.98
+          $HDDUsableSpace = 0.99
           $SSDUsableSpace = 0.98
-          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1048576 ) )
-          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1048576 ) )
+          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 512 ) )
+          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 512 ) )
           new-datavhd -path C:\C.vhd -size $HDDSize -dynamic
           new-datavhd -path D:\D.vhd -size $SSDSize -dynamic
           mount-diskimage C:\C.vhd
