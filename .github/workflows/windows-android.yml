@@ -13,7 +13,7 @@ jobs:
         shell: powershell
         run: |
           New-Item C:\report.txt
-          $sha = ${{ Github.sha }}
+          $sha = echo ${{ Github.sha }}
           $sha = echo $( echo $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru )
 
       - name: create vdisk
