@@ -44,7 +44,7 @@ jobs:
           new-datavhd -path D:\D.vhd -size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
           get-disk -number $($(Mount-DiskImage -ImagePath D:\D.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
-          Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Tee-Object $temp
+          Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
 
 
@@ -88,23 +88,23 @@ jobs:
           $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
           $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
           $WriteCacheSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $WriteCacheSpace )
-          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"  | Tee-Object $temp
+          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"  | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )" | Tee-Object $temp
+          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )" | Tee-Object $temp
+          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )" | Tee-Object -Variable $temp
           #$temp >> C:\report.txt
-          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )" | Tee-Object $temp
+          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )" | Tee-Object $temp
+          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )" | Tee-Object $temp
+          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )" | Tee-Object $temp
+          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )" | Tee-Object $temp
+          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
-          Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object $temp
+          Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object -Variable $temp
           $temp >> C:\report.txt
           Write-Output "Create Virtualdisk"
           echo Create Virtualdisk >> C:\report.txt
@@ -115,9 +115,9 @@ jobs:
             $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
             $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
-            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Tee-Object $temp
+            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Tee-Object -Variable $temp
             $temp >> C:\report.txt
-            Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object $temp
+            Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object -Variable $temp
             $temp >> C:\report.txt
             Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | out-null
