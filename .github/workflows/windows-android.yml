@@ -91,7 +91,7 @@ jobs:
           Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
           Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )"
           Write-Output "Create Virtualdisk"
-          $lv = $( $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize)
+          $lv = $( $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
             $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
