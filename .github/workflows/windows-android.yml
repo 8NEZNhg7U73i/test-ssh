@@ -40,6 +40,7 @@ jobs:
           new-datavhd -path D:\D.vhd -size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
           get-disk -number $($(Mount-DiskImage -ImagePath D:\D.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
+          Write-Output "DiskSize: ( $HDDSize , $SSDSize )"
 
       - name: create pool
         shell: powershell
@@ -47,7 +48,7 @@ jobs:
           $WriteCacheSpace = 0.5
           $SSDTierSpace = 0.95
           $HDDTierSpace = 0.95
-          $SSDTierReseverDivisorBlock = 7
+          $SSDTierReseverDivisorBlock = 8
           $HDDTierReseverDivisorBlock = 8
           $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
