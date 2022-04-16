@@ -34,8 +34,8 @@ jobs:
           $SSDSize = (get-volume -driveletter d).sizeremaining
           $HDDUsableSpace = 0.98
           $SSDUsableSpace = 0.98
-          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 1073741824 ) )
-          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 1073741824 ) )
+          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 2147483648 ) )
+          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 2147483648 ) )
           new-datavhd -path C:\C.vhd -size $HDDSize -dynamic -Confirm:$false -force
           new-datavhd -path D:\D.vhd -size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
@@ -91,7 +91,7 @@ jobs:
           Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
           Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )"
           Write-Output "Create Virtualdisk"
-          $lv = $( $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
+          $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
             $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
