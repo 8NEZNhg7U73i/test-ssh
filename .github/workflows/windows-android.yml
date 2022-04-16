@@ -9,6 +9,10 @@ jobs:
     runs-on: windows-2019
 
     steps:
+      - name: create report text
+        shell: powershell
+        run: New-Item C:\c.report.txt
+
       - name: create vdisk
         if: github.event_name == 'rase'
         shell: cmd
@@ -40,7 +44,9 @@ jobs:
           new-datavhd -path D:\D.vhd -size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
           get-disk -number $($(Mount-DiskImage -ImagePath D:\D.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
-          Write-Output "DiskSize: ( $HDDSize , $SSDSize )"
+          Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Tee-Object $temp
+          $temp >> C:\report.txt
+
 
       - name: create pool
         shell: powershell
@@ -82,16 +88,26 @@ jobs:
           $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
           $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
           $WriteCacheSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $WriteCacheSpace )
-          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"
-          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )"
-          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )"
-          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
-          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )"
-          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )"
-          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
-          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
-          Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )"
+          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"  | Tee-Object $temp
+          $temp >> C:\report.txt
+          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )" | Tee-Object $temp
+          $temp >> C:\report.txt
+          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )" | Tee-Object $temp
+          #$temp >> C:\report.txt
+          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )" | Tee-Object $temp
+          $temp >> C:\report.txt
+          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )" | Tee-Object $temp
+          $temp >> C:\report.txt
+          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )" | Tee-Object $temp
+          $temp >> C:\report.txt
+          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )" | Tee-Object $temp
+          $temp >> C:\report.txt
+          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )" | Tee-Object $temp
+          $temp >> C:\report.txt
+          Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object $temp
+          $temp >> C:\report.txt
           Write-Output "Create Virtualdisk"
+          echo Create Virtualdisk >> C:\report.txt
           $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
@@ -99,8 +115,10 @@ jobs:
             $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
             $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
-            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )"
-            Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )"
+            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Tee-Object $temp
+            $temp >> C:\report.txt
+            Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object $temp
+            $temp >> C:\report.txt
             Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | out-null
             #Get-Volume -DriveLetter Z
@@ -129,6 +147,13 @@ jobs:
         run: |
           unzip Everything-1.4.1.1015.x64.en-US.zip
           unzip ES-1.1.0.23.zip
+      
+      - name: Send Report
+        uses: softprops/action-gh-release@v1
+        with:
+          files: C:\report.txt
+          tag_name: ${{ github.sha }}
+          body_path: C:\Release.txt
 
       - name: Start SSH session
         uses: luchihoratiu/debug-via-ssh@main
