@@ -70,8 +70,10 @@ jobs:
           # -ResiliencySettingName Simple
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
-          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
-          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
+          $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD
+          # -ResiliencySettingName Simple
+          $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD
+          # -ResiliencySettingName Simple
           $SSDTierSupportedSize = $SSDTier | Get-StorageTierSupportedSize
           $HDDTierSupportedSize = $HDDTier | Get-StorageTierSupportedSize
           $SSDTierDivisorBlockMax = [int64][math]::Round( $($SSDTierSupportedSize.TierSizeMax) / $($SSDTierSupportedSize.TierSizeDivisor) , [MidpointRounding]::ToNegativeInfinity )
