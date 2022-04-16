@@ -13,7 +13,8 @@ jobs:
         shell: powershell
         run: |
           New-Item C:\report.txt
-          echo ${{ github.sha }} >>  Release.txt
+          $sha = $${{ Github.sha }}
+          $sha = $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
 
       - name: create vdisk
         if: github.event_name == 'rase'
@@ -36,18 +37,17 @@ jobs:
         #if: github.event_name == 'rase'
         shell: powershell
         run: |
-          $HDDSize = (get-volume -driveletter c).sizeremaining
-          $SSDSize = (get-volume -driveletter d).sizeremaining
+          $HDDSize = (get-volume -driveletter c).Sizeremaining
+          $SSDSize = (get-volume -driveletter d).Sizeremaining
           $HDDUsableSpace = 0.99
           $SSDUsableSpace = 0.99
           $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 2147483648 ) )
           $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 2147483648 ) )
-          new-datavhd -path C:\C.vhd -size $HDDSize -dynamic -Confirm:$false -force
-          new-datavhd -path D:\D.vhd -size $SSDSize -dynamic -Confirm:$false -force
+          new-datavhd -Path C:\C.vhd -Size $HDDSize -dynamic -Confirm:$false -force
+          new-datavhd -Path D:\D.vhd -Size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
           get-disk -number $($(Mount-DiskImage -ImagePath D:\D.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
-          Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
+          Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
 
 
       - name: create pool
@@ -58,22 +58,21 @@ jobs:
           $HDDTierSpace = 0.95
           $SSDTierReseverDivisorBlock = 4
           $HDDTierReseverDivisorBlock = 4
-          $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
-          $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
-          $hddphy = $hdd | get-disk
-          $ssdphy = $ssd | get-disk
-          $hdd | Reset-PhysicalDisk
-          $ssd | Reset-PhysicalDisk
-          Write-Output "Create StoragePool"
-          echo Create Storage >> C:\report.txt
-          $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
-          $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
-          #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
+          $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+          $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
+          $HDDphy = $HDD | get-disk
+          $SSDphy = $SSD | get-disk
+          $HDD | Reset-PhysicalDisk
+          $SSD | Reset-PhysicalDisk
+          Write-Output "Create StoragePool" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+          $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
+          #$vg = New-StoragePool -PhysicalDisks @($HDD , $SSD) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
           #-ResiliencySettingName Simple
-          $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName #-WriteCacheSizeDefault 0
+          $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($HDD , $SSD) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName #-WriteCacheSizeDefault 0
           # -ResiliencySettingName Simple
-          $hdd | Set-PhysicalDisk -MediaType HDD
-          $ssd | Set-PhysicalDisk -MediaType SSD
+          $HDD | Set-PhysicalDisk -MediaType HDD
+          $SSD | Set-PhysicalDisk -MediaType SSD
           $SSDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName SSDTier -MediaType SSD -ResiliencySettingName Simple
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
           $SSDTierSupportedSize = $SSDTier | Get-StorageTierSupportedSize
@@ -86,43 +85,31 @@ jobs:
           $HDDTierDivisorBlock = ($HDDTierDivisorBlockMax - $HDDTierReseverDivisorBlock)
           $SSDTierSize = [int64]( $SSDTierDivisorBlock * $($SSDTierSupportedSize.TierSizeDivisor) )
           $HDDTierSize = [int64]( $HDDTierDivisorBlock * $($HDDTierSupportedSize.TierSizeDivisor) )
-          #$SSDAllocated = [int64]$($ssd.allocatedsize)
-          #$HDDAllocated = [int64]$($hdd.allocatedsize)
-          $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
-          $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
+          #$SSDAllocated = [int64]$($SSD.allocatedSize)
+          #$HDDAllocated = [int64]$($HDD.allocatedSize)
+          $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
+          $HDDRemain = [int64]( $($HDD.Size) - $($HDD.allocatedSize) )
           $WriteCacheSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $WriteCacheSpace )
-          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"  | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )" | Tee-Object -Variable temp
-          #$temp >> C:\report.txt
-          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object -Variable temp
-          $temp >> C:\report.txt
-          Write-Output "Create Virtualdisk"
-          echo Create Virtualdisk >> C:\report.txt
+          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"  | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "Create Virtualdisk" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
           $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
-            $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
-            $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
-            $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
-            $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
-            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Tee-Object -Variable temp
-            $temp >> C:\report.txt
-            Write-Output "DiskAllocated: ( $($ssd.allocatedsize) , $($hdd.allocatedsize) )" | Tee-Object -Variable temp
-            $temp >> C:\report.txt
-            Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
+            $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+            $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
+            $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
+            $HDDRemain = [int64]( $($HDD.Size) - $($HDD.allocatedSize) )
+            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+              Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+              Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | out-null
             #Get-Volume -DriveLetter Z
           }
@@ -157,14 +144,14 @@ jobs:
         with:
           files: C:\report.txt
           tag_name: "storagetest${{ github.sha }}"
-          body_path: C:\report.txt
+          body_Path: C:\report.txt
 
       - name: Send Report
         uses: softprops/action-gh-release@v1
         with:
           files: C:\report.txt
           tag_name: "storagetest${{ github.sha }}"
-          body_path: C:\report.txt
+          body_Path: C:\report.txt
 
       - name: Start SSH session
         uses: luchihoratiu/debug-via-ssh@main
