@@ -54,8 +54,8 @@ jobs:
         shell: powershell
         run: |
           $WriteCacheSpace = 0.5
-          $SSDTierSpace = 0.95
-          $HDDTierSpace = 0.95
+          $SSDTierSpace = 0.94
+          $HDDTierSpace = 0.94
           $SSDTierReseverDivisorBlock = 4
           $HDDTierReseverDivisorBlock = 4
           $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
