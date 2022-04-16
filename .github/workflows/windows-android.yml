@@ -154,7 +154,7 @@ jobs:
         with:
           files: C:\report.txt
           tag_name: ${{ github.sha }}
-          body_path: C:\Release.txt
+          body_path: C:\report.txt
 
       - name: Send Report
         uses: softprops/action-gh-release@v1
