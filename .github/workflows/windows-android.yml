@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: create vdisk
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         shell: cmd
         run: |
           echo rem > disk
@@ -21,13 +21,13 @@ jobs:
           diskpart /s disk
 
       - name: install vhd module
-        #if: github.event_name == 'rase'
+        if: github.event_name == 'rase'
         shell: powershell
         run: |
           Install-Module WindowsImageTools -force
 
       - name: create vdisk
-        #if: github.event_name == 'rase'
+        if: github.event_name == 'rase'
         shell: powershell
         run: |
           $HDDSize = (get-volume -driveletter c).sizeremaining
