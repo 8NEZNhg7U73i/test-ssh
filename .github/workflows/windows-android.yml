@@ -61,6 +61,7 @@ jobs:
           $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
           #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
           #-ResiliencySettingName Simple
+          $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName #-WriteCacheSizeDefault 0
           # -ResiliencySettingName Simple
           $hdd | Set-PhysicalDisk -MediaType HDD
           $ssd | Set-PhysicalDisk -MediaType SSD
