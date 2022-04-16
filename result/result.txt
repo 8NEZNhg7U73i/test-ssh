@@ -54,17 +54,3 @@ Create Virtualdisk
 DiskRemain: ( 2398093312, 1324351488 )
 DiskAllocated: ( 8339324928 , 86722478080 )
 
-64fd83f
-DiskSize: ( 88046829568 , 10737418240 )
-Create StoragePool
-DivisorSizes: ( 268435456, 268435456 )
-TierSizeMax: ( 8589934592 , 86973087744 )
-TierDivisorBlockMax: ( 32 , 324 )
-TierDivisorBlock: ( 28 , 320 )
-TierReseverDivisorBlock: ( 4 , 4 )
-TierSizes: ( 7516192768 , 85899345920 )
-DiskRemain: ( 10735321088 , 88044732416 )
-DiskAllocated: ( 2097152 , 2097152 )
-Create Virtualdisk
-DiskRemain: ( 2398093312, 1324351488 )
-DiskAllocated: ( 8339324928 , 86722478080 )
