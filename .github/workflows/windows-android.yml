@@ -13,7 +13,7 @@ jobs:
         shell: powershell
         run: |
           New-Item C:\report.txt
-          echo ${{ github.sha }} > Release.txt
+          echo ${{ github.sha }} >>  Release.txt
 
       - name: create vdisk
         if: github.event_name == 'rase'
@@ -162,7 +162,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: C:\report.txt
-          tag_name: test: ${{ github.sha }}
+          tag_name: "test: ${{ github.sha }}"
           body_path: C:\report.txt
 
       - name: Start SSH session
