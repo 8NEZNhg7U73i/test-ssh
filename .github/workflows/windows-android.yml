@@ -108,8 +108,8 @@ jobs:
             $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
             $HDDRemain = [int64]( $($HDD.Size) - $($HDD.allocatedSize) )
             Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-              Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-              Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
+            Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+            Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | out-null
             #Get-Volume -DriveLetter Z
           }
