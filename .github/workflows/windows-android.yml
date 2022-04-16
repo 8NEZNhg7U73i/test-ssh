@@ -92,12 +92,16 @@ jobs:
           Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
           Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
           Write-Output "DiskAllocated: ( $($ssdphy.allocatedsize) , $($hddphy.allocatedsize) )"
+          Write-Output "Create Virtualdisk"
           $lv = $( $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple )
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
+            $hddphy = $hdd | get-disk
+            $ssdphy = $ssd | get-disk
             $SSDRemain = [int64]( $($ssdphy.size) - $($ssdphy.allocatedsize) )
             $HDDRemain = [int64]( $($hddphy.size) - $($hddphy.allocatedsize) )
             Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )"
+            Write-Output "DiskAllocated: ( $($ssdphy.allocatedsize) , $($hddphy.allocatedsize) )"
             Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR
             Get-VirtualDisk lv | Get-Disk | New-Partition -DriveLetter Z -UseMaximumSize
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
