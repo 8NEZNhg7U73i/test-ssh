@@ -61,6 +61,9 @@ jobs:
           $ssdphy = $ssd | get-disk
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
+          Write-Output "Create StoragePool"
+          $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+          $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
           #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
           #-ResiliencySettingName Simple
           $vg = New-StoragePool -FriendlyName vg -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName 
@@ -96,6 +99,8 @@ jobs:
           $lv = $( $vg | New-VirtualDisk -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple )
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
+            $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
+            $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($ssd.size) - $($ssd.allocatedsize) )
             $HDDRemain = [int64]( $($hdd.size) - $($hdd.allocatedsize) )
             Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )"
