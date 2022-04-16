@@ -14,7 +14,7 @@ jobs:
         run: |
           New-Item C:\report.txt
           $sha = ${{ Github.sha }}
-          $sha = $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          $sha = ( $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru )
 
       - name: create vdisk
         if: github.event_name == 'rase'
