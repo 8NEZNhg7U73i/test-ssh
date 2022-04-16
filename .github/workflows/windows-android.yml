@@ -65,6 +65,7 @@ jobs:
           $hdd | Reset-PhysicalDisk
           $ssd | Reset-PhysicalDisk
           Write-Output "Create StoragePool"
+          echo Create Storage >> C:\report.txt
           $hdd = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
           $ssd = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
           #$vg = New-StoragePool -PhysicalDisks @($hdd , $ssd) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
@@ -155,7 +156,7 @@ jobs:
         if: ${{ failure() }}
         with:
           files: C:\report.txt
-          tag_name: ${{ github.sha }}
+          tag_name: "test: ${{ github.sha }}"
           body_path: C:\report.txt
 
       - name: Send Report
