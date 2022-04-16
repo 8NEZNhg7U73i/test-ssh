@@ -34,8 +34,8 @@ jobs:
           $SSDSize = (get-volume -driveletter d).sizeremaining
           $HDDUsableSpace = 0.98
           $SSDUsableSpace = 0.98
-          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 268435456 ) )
-          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 268435456 ) )
+          $HDDSize = [int64]( ( $HDDSize * $HDDUsableSpace ) - ( $HDDSize * $HDDUsableSpace % 536870912 ) )
+          $SSDSize = [int64]( ( $SSDSize * $SSDUsableSpace ) - ( $SSDSize * $SSDUsableSpace % 536870912 ) )
           new-datavhd -path C:\C.vhd -size $HDDSize -dynamic -Confirm:$false -force
           new-datavhd -path D:\D.vhd -size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
