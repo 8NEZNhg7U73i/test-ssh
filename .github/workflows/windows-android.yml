@@ -75,8 +75,8 @@ jobs:
           $HDDTier = New-StorageTier -StoragePoolFriendlyName vg -FriendlyName HDDTier -MediaType HDD -ResiliencySettingName Simple
           $SSDTierSupportedSize = $SSDTier | Get-StorageTierSupportedSize
           $HDDTierSupportedSize = $HDDTier | Get-StorageTierSupportedSize
-          $SSDTierDivisorBlockMax = [int64][math]::Round( $($SSDTierSupportedSize.TierSizeMax) / $($SSDTierSupportedSize.TierSizeDivisor) , [MidpointRounding]::ToNegativeInfinity )
-          $HDDTierDivisorBlockMax = [int64][math]::Round( $($HDDTierSupportedSize.TierSizeMax) / $($HDDTierSupportedSize.TierSizeDivisor) , [MidpointRounding]::ToNegativeInfinity )
+          $SSDTierDivisorBlockMax = [int64][math]::Floor( $($SSDTierSupportedSize.TierSizeMax) / $($SSDTierSupportedSize.TierSizeDivisor) )
+          $HDDTierDivisorBlockMax = [int64][math]::Floor( $($HDDTierSupportedSize.TierSizeMax) / $($HDDTierSupportedSize.TierSizeDivisor) )
           #$SSDTierSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $SSDTierSpace - $($SSDTierSupportedSize.TierSizeMax) * $SSDTierSpace % $($SSDTierSupportedSize.TierSizeDivisor) )
           #$HDDTierSize = [int64]( $($HDDTierSupportedSize.TierSizeMax) * $HDDTierSpace - $($HDDTierSupportedSize.TierSizeMax) * $HDDTierSpace % $($HDDTierSupportedSize.TierSizeDivisor) )
           $SSDTierDivisorBlock = ($SSDTierDivisorBlockMax - $SSDTierReseverDivisorBlock)
