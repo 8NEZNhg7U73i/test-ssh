@@ -118,7 +118,7 @@ jobs:
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
             #Add-PartitionAccessPath -AccessPath $path
             #Get-Volume -DriveLetter Z
-            Add-PartitionAccessPath -DriveLetter Z -AccessPath $path
+            #Add-PartitionAccessPath -DriveLetter Z -AccessPath $path
           }
 
       - name: list something
