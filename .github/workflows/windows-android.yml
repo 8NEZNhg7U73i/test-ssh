@@ -42,7 +42,6 @@ jobs:
           get-disk -number $($(Mount-DiskImage -ImagePath D:\D.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
           Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
 
-
       - name: create pool
         #if: github.event_name == 'rase'
         shell: powershell
