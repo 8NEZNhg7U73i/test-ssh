@@ -13,12 +13,12 @@ jobs:
         #if: github.event_name == 'rase'
         shell: cmd
         run: |
-          echo rem > disk
-          echo create vdisk file=C:\C.vhd maximum=87040 type=EXPANDABLE >> disk
-          echo attach vdisk >> disk
-          echo create vdisk file=D:\D.vhd maximum=10240 type=EXPANDABLE >> disk
-          echo attach vdisk >> disk
-          diskpart /s disk
+          echo rem > c:\disk
+          echo create vdisk file=C:\C.vhd maximum=87040 type=EXPANDABLE >> c:\disk
+          echo attach vdisk >> c:\disk
+          echo create vdisk file=D:\D.vhd maximum=10240 type=EXPANDABLE >> c:\disk
+          echo attach vdisk >> c:\disk
+          diskpart /s c:\disk
 
       - name: install vhd module
         if: github.event_name == 'rase'
@@ -40,7 +40,7 @@ jobs:
           new-datavhd -Path D:\D.vhd -Size $SSDSize -dynamic -Confirm:$false -force
           get-disk -number $($(Mount-DiskImage -ImagePath C:\C.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
           get-disk -number $($(Mount-DiskImage -ImagePath D:\D.vhd).number) | Clear-Disk -RemoveData -RemoveOEM -Confirm:$false
-          Write-Output "DiskSize: ( $HDDSize , $SSDSize )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "DiskSize: ( $HDDSize , $SSDSize )"
 
       - name: create pool
         #if: github.event_name == 'rase'
@@ -55,7 +55,7 @@ jobs:
           $SSDphy = $SSD | get-disk
           $HDD | Reset-PhysicalDisk
           $SSD | Reset-PhysicalDisk
-          Write-Output "Create StoragePool" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "Create StoragePool"
           $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
           $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
           #$vg = New-StoragePool -PhysicalDisks @($HDD , $SSD) -StorageSubSystemFriendlyName (Get-StorageSubSystem).FriendlyName -FriendlyName vg 
@@ -81,16 +81,16 @@ jobs:
           $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
           $HDDRemain = [int64]( $($HDD.Size) - $($HDD.allocatedSize) )
           $WriteCacheSize = [int64]( $($SSDTierSupportedSize.TierSizeMax) * $WriteCacheSpace )
-          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )"  | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-          Write-Output "Create Virtualdisk" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+          Write-Output "DivisorSizes: ( $($SSDTierSupportedSize.TierSizeDivisor), $($HDDTierSupportedSize.TierSizeDivisor) )" 
+          Write-Output "TierSizeMax: ( $($SSDTierSupportedSize.TierSizeMax) , $($HDDTierSupportedSize.TierSizeMax) )"
+          #Write-Output "TierSizeMin: ( $($SSDTierSupportedSize.TierSizeMin) , $($HDDTierSupportedSize.TierSizeMin) )"
+          Write-Output "TierDivisorBlockMax: ( $SSDTierDivisorBlockMax , $HDDTierDivisorBlockMax )"
+          Write-Output "TierDivisorBlock: ( $SSDTierDivisorBlock , $HDDTierDivisorBlock )"
+          Write-Output "TierReseverDivisorBlock: ( $SSDTierReseverDivisorBlock , $HDDTierReseverDivisorBlock )"
+          Write-Output "TierSizes: ( $SSDTierSize , $HDDTierSize )"
+          Write-Output "DiskRemain: ( $SSDRemain , $HDDRemain )"
+          Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )"
+          Write-Output "Create Virtualdisk"
           $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
@@ -98,8 +98,8 @@ jobs:
             $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
             $HDDRemain = [int64]( $($HDD.Size) - $($HDD.allocatedSize) )
-            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-            Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
+            Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )"
+            Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )"
             Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | Out-Null
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | Out-Null
             Set-Variable -Name path -Value ${{ github.repository }}
