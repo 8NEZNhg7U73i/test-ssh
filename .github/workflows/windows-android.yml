@@ -114,6 +114,7 @@ jobs:
             set dirname=${{ github.repository }}
             for /F "delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
+              echo %dirname%
             )
             echo %dirname%
             set path="D:\a\%dirname%\%dirname%"
