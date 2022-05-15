@@ -121,9 +121,10 @@ jobs:
           get-partition
           get-volume
 
-      - uses: actions/checkout@v2
+      #- uses: actions/checkout@v2
 
       - name: Download everything
+        if: github.event_name == 'rase'
         shell: powershell
         run: |
           wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile Everything-1.4.1.1015.x64.en-US.zip
@@ -132,12 +133,14 @@ jobs:
           wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile C:\users\runneradmin\ES-1.1.0.23.zip
 
       - name: Unzip everything
+        if: github.event_name == 'rase'
         shell: cmd
         run: |
           unzip Everything-1.4.1.1015.x64.en-US.zip
           unzip ES-1.1.0.23.zip
       
       - name: Send Report
+        if: github.event_name == 'rase'
         uses: softprops/action-gh-release@v1
         if: ${{ failure() }}
         with:
@@ -146,6 +149,7 @@ jobs:
           body_Path: C:\report.txt
 
       - name: Send Report
+        if: github.event_name == 'rase'
         uses: softprops/action-gh-release@v1
         with:
           files: C:\report.txt
