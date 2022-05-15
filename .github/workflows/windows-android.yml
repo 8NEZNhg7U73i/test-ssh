@@ -104,7 +104,7 @@ jobs:
           if ($lv -ne $null) {
             
             Set-Variable -Name path -Value ${{ github.repository }}
-            Set-Variable -Name path -Value $( $path -split "/")
+            $path = $path -Split "/"
             Set-Variable -Name path -Value D:\$path[1]\$path[1]
             Write-Output $path
             $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
