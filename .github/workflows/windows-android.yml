@@ -17,7 +17,7 @@ jobs:
           $sha = echo $( echo $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru )
 
       - name: create vdisk
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         shell: cmd
         run: |
           echo rem > disk
@@ -34,7 +34,7 @@ jobs:
           Install-Module WindowsImageTools -force
 
       - name: create vdisk
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         shell: powershell
         run: |
           $HDDSize = (get-volume -driveletter c).Sizeremaining
@@ -51,7 +51,7 @@ jobs:
 
 
       - name: create pool
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         shell: powershell
         run: |
           $WriteCacheSpace = 0.5
