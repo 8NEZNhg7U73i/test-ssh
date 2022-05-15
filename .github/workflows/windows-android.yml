@@ -105,8 +105,8 @@ jobs:
             Set-Variable -Name path -Value ${{ github.repository }}
             $path = $path -Split "/"
             Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
-            Get-ChildItem -path $path | cat
-            Move-Item -Force -path $path D:\null
+            Get-ChildItem -path $path | Remove-Item -Force
+            #Move-Item -Force -path $path D:\null
             New-Item -Force $path
             $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
             $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
