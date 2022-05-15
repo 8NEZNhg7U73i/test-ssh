@@ -102,6 +102,12 @@ jobs:
             Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )"
             Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | Out-Null
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | Out-Null
+          }
+
+      - name: make symbolic link target to the virtualdisk volume
+        shell: pwsh
+        run: |
+            Set-Location -path D:\
             Set-Variable -Name path -Value ${{ github.repository }}
             $path = $path -Split "/"
             Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
@@ -109,7 +115,6 @@ jobs:
             Remove-Item -path $path
             New-Item -ItemType directory -path "Z:\datadir"
             New-Item -ItemType symboliclink -path $path -target "Z:\datadir"
-          }
 
       - name: list something
         shell: powershell
