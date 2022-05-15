@@ -120,8 +120,13 @@ jobs:
           get-physicalDisk
           get-partition
           get-volume
-
-      #- uses: actions/checkout@v2
+      
+      - name: remove everything
+        shell: cmd
+        run: |
+          rmdir /s /q Z:\*
+      
+      - uses: actions/checkout@v2
 
       - name: Download everything
         if: github.event_name == 'rase'
