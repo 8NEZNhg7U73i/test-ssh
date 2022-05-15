@@ -105,7 +105,7 @@ jobs:
             
             Set-Variable -Name path -Value ${{ github.repository }}
             $path = $path -Split "/"
-            Set-Variable -Name path -Value D:\a\$($path[1])
+            Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
             New-Item -Force $path
             Write-Output $path
             $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
