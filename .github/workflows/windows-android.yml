@@ -102,6 +102,7 @@ jobs:
           $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
+            Set-Variable -Name path -Value $( ${{ github.repository }} -split "/" )
             $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
             $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
@@ -109,9 +110,9 @@ jobs:
             Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
             Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
             Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | out-null
-            Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | out-null
-            Get-Volume -DriveLetter Z
-            Add-PartitionAccessPath -DriveLetter z -AccessPath d:\${{ github.repository }}\${{ github.repository }}
+            Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | Add-PartitionAccessPath -AccessPath D:\$path[1]\$path[1]
+            #Get-Volume -DriveLetter Z
+            #Add-PartitionAccessPath -DriveLetter Z -AccessPath D:\$path\$path
           }
 
       - name: list something
