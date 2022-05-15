@@ -106,7 +106,7 @@ jobs:
 
       - name: make symbolic link target to the virtualdisk volume
         shell: cmd
-        if: github.event_name == 'rase'
+        #if: github.event_name == 'rase'
         run: |
             rem Set-Location -path D:\
             cd D:\
