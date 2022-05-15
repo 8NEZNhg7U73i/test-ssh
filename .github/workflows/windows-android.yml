@@ -108,24 +108,14 @@ jobs:
         shell: cmd
         #if: github.event_name == 'rase'
         run: |
-            rem Set-Location -path D:\
             cd D:\
-            rem Set-Variable -Name path -Value ${{ github.repository }}
-            rem $path = $path -Split "/"
             set dirname=${{ github.repository }}
             for /F "tokens=2 delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
-              echo %%i
             )
-            echo %dirname%
             set path="D:\a\%dirname%\%dirname%"
-            rem Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
-            rem Get-ChildItem -path $path | Remove-Item
-            rem Remove-Item -path $path
             rmdir /s /q %path%
-            rem New-Item -ItemType directory -path "Z:\datadir"
             mkdir "Z:\datadir"
-            rem New-Item -ItemType symboliclink -path $path -target "Z:\datadir"
             mklink /D %path% "Z:\datadir"
 
       - name: list something
@@ -136,7 +126,7 @@ jobs:
           get-partition
           get-volume
       
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: Download everything
         if: github.event_name == 'rase'
