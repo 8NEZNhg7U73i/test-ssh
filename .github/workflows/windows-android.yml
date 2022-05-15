@@ -94,23 +94,21 @@ jobs:
           $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
-            Set-Variable -Name path -Value ${{ github.repository }}
-            $path = $path -Split "/"
-            Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
-            Get-ChildItem -path $path | Remove-Item -Force
-            #Move-Item -Force -path $path D:\null
-            #New-Item -Force $path
             $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
             $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
             $HDDRemain = [int64]( $($HDD.Size) - $($HDD.allocatedSize) )
             Write-Output "DiskRemain: ( $SSDRemain, $HDDRemain )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
             Write-Output "DiskAllocated: ( $($SSD.allocatedSize) , $($HDD.allocatedSize) )" | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru
-            Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | Add-PartitionAccessPath -Access $path
-            Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume
-            #Add-PartitionAccessPath -AccessPath $path
-            #Get-Volume -DriveLetter Z
-            #Add-PartitionAccessPath -DriveLetter Z -AccessPath $path
+            Get-VirtualDisk lv | Get-Disk | Initialize-Disk -PartitionStyle MBR -PassThru | New-Partition -DriveLetter Z -UseMaximumSize | Out-Null
+            Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | Out-Null
+            Set-Variable -Name path -Value ${{ github.repository }}
+            $path = $path -Split "/"
+            Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
+            Get-ChildItem -path $path | Remove-Item
+            Remove-Item -path $path
+            New-Item -ItemType directory -path "Z:\datadir"
+            New-Item -ItemType symboliclink -path $path -target "Z:\datadir"
           }
 
       - name: list something
@@ -120,12 +118,6 @@ jobs:
           get-physicalDisk
           get-partition
           get-volume
-      
-      - name: remove everything
-        if: github.event_name == 'rase'
-        shell: cmd
-        run: |
-          rmdir /s /q Z:\*
       
       #- uses: actions/checkout@v2
 
