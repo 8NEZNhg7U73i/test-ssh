@@ -140,7 +140,6 @@ jobs:
           unzip ES-1.1.0.23.zip
       
       - name: Send Report
-        if: github.event_name == 'rase'
         uses: softprops/action-gh-release@v1
         if: ${{ failure() }}
         with:
