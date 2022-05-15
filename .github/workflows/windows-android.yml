@@ -9,13 +9,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-      - name: create report text
-        shell: powershell
-        run: |
-          New-Item C:\report.txt
-          $sha = echo ${{ Github.sha }}
-          $sha = echo $( echo $sha.Substring(0,7) | Add-Content -Path C:\report.txt -Encoding Ascii -PassThru )
-
       - name: create vdisk
         #if: github.event_name == 'rase'
         shell: cmd
