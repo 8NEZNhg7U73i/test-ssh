@@ -115,7 +115,7 @@ jobs:
             for /F "delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
             )
-            set path="D:\a\$dirname\$dirname"
+            set path="D:\a\%dirname%\%dirname%"
             rem Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
             rem Get-ChildItem -path $path | Remove-Item
             rem Remove-Item -path $path
