@@ -102,13 +102,12 @@ jobs:
           $lv = $( New-VirtualDisk -StoragePoolFriendlyName vg -FriendlyName lv -StorageTiers @($SSDTier , $HDDTier) -StorageTierSizes @($SSDTierSize , $HDDTierSize) -ResiliencySettingName Simple -WriteCacheSize 0)
           # -WriteCacheSize $WriteCacheSize
           if ($lv -ne $null) {
-            
             Set-Variable -Name path -Value ${{ github.repository }}
             $path = $path -Split "/"
             Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
-            #New-Item -Force $path
+            Move-Item -path $path d:\null
+            New-Item -Force $path
             Get-ChildItem -path $path
-            Write-Output $path
             $HDD = get-physicaldisk | where physicallocation -eq "C:\C.vhd"
             $SSD = get-physicaldisk | where physicallocation -eq "D:\D.vhd"
             $SSDRemain = [int64]( $($SSD.Size) - $($SSD.allocatedSize) )
