@@ -113,9 +113,9 @@ jobs:
             rem Set-Variable -Name path -Value ${{ github.repository }}
             rem $path = $path -Split "/"
             set dirname=${{ github.repository }}
-            for /F "delims=/,tokens=*" %%i in ("%dirname%") do (
+            for /F "tokens=2 delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
-              echo %dirname%
+              echo %%i
             )
             echo %dirname%
             set path="D:\a\%dirname%\%dirname%"
