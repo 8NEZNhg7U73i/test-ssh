@@ -107,22 +107,22 @@ jobs:
       - name: make symbolic link target to the virtualdisk volume
         shell: cmd
         run: |
-            ##Set-Location -path D:\
+            rem Set-Location -path D:\
             cd D:\
-            ##Set-Variable -Name path -Value ${{ github.repository }}
-            ##$path = $path -Split "/"
+            rem Set-Variable -Name path -Value ${{ github.repository }}
+            rem $path = $path -Split "/"
             set dirname=${{ github.repository }}
             for /F "delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
             )
             set path="D:\a\$dirname\$dirname"
-            ##Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
-            ##Get-ChildItem -path $path | Remove-Item
-            ##Remove-Item -path $path
+            rem Set-Variable -Name path -Value D:\a\$($path[1])\$($path[1])
+            rem Get-ChildItem -path $path | Remove-Item
+            rem Remove-Item -path $path
             rmdir /s /q %path%
-            ##New-Item -ItemType directory -path "Z:\datadir"
+            rem New-Item -ItemType directory -path "Z:\datadir"
             mkdir "Z:\datadir"
-            ##New-Item -ItemType symboliclink -path $path -target "Z:\datadir"
+            rem New-Item -ItemType symboliclink -path $path -target "Z:\datadir"
             mklink /D %path% "Z:\datadir"
 
       - name: list something
