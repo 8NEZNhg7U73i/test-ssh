@@ -114,7 +114,7 @@ jobs:
               set dirname=%%i
             )
             dir /s D:\a
-            #rmdir /s /q D:\a
+            rmdir /s D:\a
             mkdir Z:\datadir
             mklink /J D:\a Z:\datadir
             mkdir "D:\a\%dirname%"
