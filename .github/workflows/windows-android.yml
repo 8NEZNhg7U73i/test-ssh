@@ -113,9 +113,9 @@ jobs:
             for /F "tokens=2 delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
             )
-            rmdir /s /q "D:\a"
-            mkdir "Z:\datadir"
-            mklink /J "D:\a" "Z:\datadir"
+            rmdir /s /q D:\a
+            mkdir Z:\datadir
+            mklink /J D:\a Z:\datadir
             mkdir "D:\a\%dirname%"
             mkdir "D:\a\%dirname%\%dirname%"
 
@@ -128,47 +128,7 @@ jobs:
           get-volume
 
       - uses: actions/checkout@v2
-
-      - name: Download everything
-        if: github.event_name == 'rase'
-        shell: powershell
-        run: |
-          wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile Everything-1.4.1.1015.x64.en-US.zip
-          wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile ES-1.1.0.23.zip
-          wget https://www.voidtools.com/Everything-1.4.1.1015.x64.en-US.zip -outfile C:\users\runneradmin\Everything-1.4.1.1015.x64.en-US.zip
-          wget https://www.voidtools.com/ES-1.1.0.23.zip -outfile C:\users\runneradmin\ES-1.1.0.23.zip
-
-      - name: Unzip everything
-        if: github.event_name == 'rase'
-        shell: cmd
-        run: |
-          unzip Everything-1.4.1.1015.x64.en-US.zip
-          unzip ES-1.1.0.23.zip
       
-      - name: Send Report
-        uses: softprops/action-gh-release@v1
-        if: ${{ failure() }}
-        with:
-          files: C:\report.txt
-          tag_name: "test"
-          body_Path: C:\report.txt
-
-      - name: Send Report
-        if: github.event_name == 'rase'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: C:\report.txt
-          tag_name: "test"
-          body_Path: C:\report.txt
-
-      - name: Start SSH session
-        uses: luchihoratiu/debug-via-ssh@main
-        #if: ${{ failure() }}
-        if: github.event_name == 'rase'
-        with:
-          NGROK_AUTH_TOKEN: "22SNO8KcDq55CgkjOgvGOixDedd_2S8m1YLWgJvGTBKriDMr4"
-          SSH_PASS: "ffg476vD87XY"
-
       - name: Start SSH session
         uses: 8NEZNhg7U73i/debug-via-ssh@main
         #if: github.event_name == 'rase'
