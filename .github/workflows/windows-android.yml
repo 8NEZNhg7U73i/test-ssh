@@ -115,6 +115,7 @@ jobs:
             rmdir /s /q "D:\a"
             mkdir "Z:\datadir"
             mklink /D "D:\a" "Z:\datadir"
+            mkdir "D:\a\%dirname%"
             mkdir "D:\a\%dirname%\%dirname%"
 
       - name: list something
