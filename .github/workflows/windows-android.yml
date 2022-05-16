@@ -113,11 +113,9 @@ jobs:
             for /F "tokens=2 delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
             )
-            dir /s D:\a
-            rmdir /s D:\a
-            mkdir Z:\datadir
-            mklink /J D:\a Z:\datadir
-            mkdir "D:\a\%dirname%"
+            rmdir /s /q "D:\a\%dirname%"
+            mkdir "Z:\datadir"
+            mklink /J "D:\a\%dirname%" "Z:\datadir"
             mkdir "D:\a\%dirname%\%dirname%"
 
       - name: list something
