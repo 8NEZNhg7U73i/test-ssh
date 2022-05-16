@@ -106,6 +106,7 @@ jobs:
 
       - name: make junction target to the virtualdisk volume
         shell: cmd
+        if: github.event_name == 'rase'
         run: |
             cd D:\
             set dirname=${{ github.repository }}
