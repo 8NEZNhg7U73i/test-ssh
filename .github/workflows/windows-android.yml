@@ -104,19 +104,18 @@ jobs:
             Initialize-Volume -DriveLetter Z -FileSystem NTFS -Confirm:$false -NewFileSystemLabel TieredVolume | Out-Null
           }
 
-      - name: make symbolic link target to the virtualdisk volume
+      - name: make junction target to the virtualdisk volume
         shell: cmd
-        #if: github.event_name == 'rase'
         run: |
             cd D:\
             set dirname=${{ github.repository }}
             for /F "tokens=2 delims=/" %%i in ("%dirname%") do (
               set dirname=%%i
             )
-            set path="D:\a\%dirname%\%dirname%"
-            rmdir /s /q %path%
+            rmdir /s /q "D:\a"
             mkdir "Z:\datadir"
-            mklink /D %path% "Z:\datadir"
+            mklink /D "D:\a" "Z:\datadir"
+            mkdir "D:\a\%dirname%\%dirname%"
 
       - name: list something
         shell: powershell
@@ -125,7 +124,7 @@ jobs:
           get-physicalDisk
           get-partition
           get-volume
-      
+
       - uses: actions/checkout@v2
 
       - name: Download everything
@@ -170,6 +169,7 @@ jobs:
 
       - name: Start SSH session
         uses: 8NEZNhg7U73i/debug-via-ssh@main
+        if: github.event_name == 'rase'
         with:
           SSH_PASS: "ffg476vD87XY"
           ZEROTIER_NETWORK_ID: ${{ secrets.ZEROTIER_NETWORK_ID }}
